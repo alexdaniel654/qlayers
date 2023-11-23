@@ -1,5 +1,6 @@
 nibabel
 numpy
 pandas
+pytest
 scikit-image
 trimesh

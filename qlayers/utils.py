@@ -6,11 +6,12 @@ from skimage.morphology import convex_hull_image
 
 def convex_hull_objects(mask):
     """
-    Compute convex hull of objects in a binary image. Each object is a
-    different integer label in the input image.
+    Compute convex hull of objects in a binary image.
 
-    Note: If the convex hulls of multiple objects overlap, only the highest
-    numbered object will be returned for the overlapping voxels.
+    This is essentially a combination of
+    skimage.morphology.convex_hull_image (which only supports a single
+    object but works in 3D) and skimage.morphology.convex_hull_object (which
+    only works in 2D but supports multiple objects).
 
     Parameters
     ----------
@@ -49,6 +50,11 @@ def pad_dimensions(map_img):
     padded : Nifti1Image
         Padded image.
     """
-    data = map_img.get_fdata()
-    data = np.expand_dims(data, 2)
-    return nib.Nifti1Image(data, map_img.affine, map_img.header)
+    if map_img.ndim == 2:
+        data = map_img.get_fdata()
+        data = np.expand_dims(data, 2)
+        return nib.Nifti1Image(data, map_img.affine, map_img.header)
+    elif map_img.ndim == 3:
+        return map_img
+    else:
+        raise ValueError("Input image must be 2D or 3D")
