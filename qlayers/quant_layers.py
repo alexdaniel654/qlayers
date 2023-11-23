@@ -11,14 +11,14 @@ from .utils import convex_hull_objects, pad_dimensions
 
 
 class QLayers:
-    def __init__(self, mask_img, thickness, fill_ml=10, pelvise_dist=0, space="map"):
+    def __init__(self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"):
         self.mask_img = mask_img
         self.mask = mask_img.get_fdata() > 0.5
         self.zoom = mask_img.header.get_zooms()
         self.affine = mask_img.affine
         self.thickness = thickness
         self.fill_ml = fill_ml
-        self.pelvise_dist = pelvise_dist
+        self.pelvis_dist = pelvis_dist
         self.space = space
         self.depth = self._calculate_depth()
         self.layers = np.ceil(self.depth * (1 / self.thickness)) / (1 / self.thickness)
@@ -71,6 +71,7 @@ class QLayers:
             self.df_long = pd.concat([self.df_long, sub_df])
 
     def add_tissue(self, tissue_img):
+        # TODO add_tissue method
         raise NotImplementedError("Not yet implemented")
 
     def get_df(self, format="long"):
@@ -107,11 +108,11 @@ class QLayers:
         layer_img = nib.Nifti1Image(self.layers, self.affine)
         nib.save(layer_img, fname)
 
-    def save_pelvise(self, fname):
-        if not hasattr(self, "pelvise"):
-            self._segment_pelvise()
-        pelvise_img = nib.Nifti1Image(self.pelvise.astype(int), self.affine)
-        nib.save(pelvise_img, fname)
+    def save_pelvis(self, fname):
+        if not hasattr(self, "pelvis"):
+            self._segment_pelvis()
+        pelvis_img = nib.Nifti1Image(self.pelvis.astype(int), self.affine)
+        nib.save(pelvis_img, fname)
 
     def _calculate_depth(self):
         # Fill any holes in the mask with volume less than fill_ml (measured in millileters)
@@ -148,11 +149,11 @@ class QLayers:
         # Write these distances to voxels in the shape of the original image
         depth = np.zeros(self.mask.shape)
         depth[self.mask > 0.5] = distances
-        if self.pelvise_dist != 0:
+        if self.pelvis_dist != 0:
             print("Masking Pelvise")
-            self._segment_pelvise()
+            self._segment_pelvis()
             verts_p, faces_p, normals_p, _ = marching_cubes(
-                self.pelvise.astype(np.uint8),
+                self.pelvis.astype(np.uint8),
                 spacing=self.zoom,
                 level=0.5,
                 step_size=1.0,
@@ -165,11 +166,11 @@ class QLayers:
             )
             depth_p = np.zeros(self.mask.shape)
             depth_p[self.mask > 0.5] = distances_p
-            depth[depth_p < self.pelvise_dist] = 0
+            depth[depth_p < self.pelvis_dist] = 0
 
         return depth
 
-    def _segment_pelvise(self):
+    def _segment_pelvis(self):
         fill_vox = int(self.fill_ml / (np.prod(self.zoom) / 1000))
         mask_filled = remove_small_holes(self.mask, fill_vox)
         mask_ch = convex_hull_objects(mask_filled)
@@ -177,4 +178,4 @@ class QLayers:
         hulls = opening(hulls)
         noise_ml = 2.5
         noise_vox = int(noise_ml / (np.prod(self.zoom) / 1000))
-        self.pelvise = remove_small_objects(hulls, noise_vox)
+        self.pelvis = remove_small_objects(hulls, noise_vox)
