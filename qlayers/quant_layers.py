@@ -111,7 +111,7 @@ class QLayers:
     def save_pelvis(self, fname):
         if not hasattr(self, "pelvis"):
             self._segment_pelvis()
-        pelvis_img = nib.Nifti1Image(self.pelvis.astype(int), self.affine)
+        pelvis_img = nib.Nifti1Image(self.pelvis.astype(np.int32), self.affine)
         nib.save(pelvis_img, fname)
 
     def _calculate_depth(self):
