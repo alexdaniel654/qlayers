@@ -10,13 +10,17 @@ from qlayers import QLayers
 
 
 class TestQLayers:
+    # Generate a 16 x 16 x 16 cube in a 32 x 32 x 32 image
     basic_data = np.zeros((32, 32, 32))
     basic_data[8:24, 8:24, 8:24] = 1
     basic_img = nib.Nifti1Image(basic_data, np.eye(4))
 
+    # Generate a 32 x 32 x 32 cube with values increasing in the y direction
+    # to simulate a quantitative map
     basic_map_data, _, _ = np.meshgrid(np.arange(32), np.ones(32), np.ones(32))
     basic_map_img = nib.Nifti1Image(basic_map_data.astype(np.int32), np.eye(4))
 
+    # Generate a low resolution version of the map above (with 2 mm voxels)
     basic_map_low_res_data, _, _ = np.meshgrid(
         np.arange(16), np.ones(16), np.ones(16)
     )
@@ -24,11 +28,16 @@ class TestQLayers:
         basic_map_low_res_data.astype(np.int32), np.eye(4) * 2
     )
 
+    # Generate a 16 x 16 x 16 cube in a 32 x 32 x 32 image with a 4 x 4 x 4
+    # cyst in the middle
     basic_data_with_cyst = np.zeros((32, 32, 32))
     basic_data_with_cyst[8:24, 8:24, 8:24] = 1
     basic_data_with_cyst[10:14, 10:14, 10:14] = 0
     basic_img_with_cyst = nib.Nifti1Image(basic_data_with_cyst, np.eye(4))
 
+    # Generate a 256 x 256 x 17 image with two kidneys and a pelvis
+    # Kidneys are oblongs rather than the usual kidney shape. Voxel size is
+    # 1.5 x 1.5 x 5.5 mm typical of anatomical scans
     kidneys_with_pelvis = np.zeros((256, 256, 17))
     kidneys_with_pelvis[96:160, 64:96, 5:12] = 1
     kidneys_with_pelvis[123:133, 86:96, 6:10] = 0
@@ -187,6 +196,8 @@ class TestQLayers:
             np.array([2.2367, 2.5698, 15.500, 15.500]),
             decimal=2,
         )
+        with pytest.raises(ValueError):
+            qlayers.get_df(format="invalid")
 
     def test_map_resampling_layer_space(self):
         qlayers = QLayers(self.basic_img, space="layers")

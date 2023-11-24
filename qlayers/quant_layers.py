@@ -11,6 +11,40 @@ from .utils import convex_hull_objects, pad_dimensions
 
 
 class QLayers:
+    """
+    This class takes in a mask of a kidney and calculates the depth of each
+    voxel from the surface of the kidney. The kidney is then divided into
+    layers of a specified thickness that can be used as regions of interest.
+    It can then be used to add maps of other quantitative parameters to the
+    kidney and generate dataframes of these parameters with depth/layer.
+
+    Parameters
+    ----------
+    mask_img : nibabel.nifti1.Nifti1Image
+        Binary mask of kidney
+    thickness : float, optional
+        Default 1
+        Thickness of layers to use when quantising depth, in millimeters
+    fill_ml : float, optional
+        Default 10
+        Volume of holes in the mask to fill (usually cycst), in cubic
+        centimeters (ml)
+    pelvis_dist : float, optional
+        Default 0
+        Voxels within `pelvis_dist` of the renal pelvis are excluded from
+        the resulting depth/layer calculations.
+        If 0, no pelvis segmentation is performed
+    space : {"map", "layers"}, optional
+        Default "map"
+        If "map", the depth map is resampled to the space of the
+        depth/layers are resampled to the space of the quantitative map. If
+        "layers", the quantitative map is resampled to the space of the
+        layers/depth. "map" gives more accurate quantitative results as the
+        map is not resampled however "layers" allows for the output of a
+        wide dataframe where each row contains the depth, layer and all
+        quantitative measurements for a voxel.
+    """
+
     def __init__(
         self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"
     ):
@@ -37,6 +71,19 @@ class QLayers:
             self.df_wide["layer"] = self.layers[self.mask]
 
     def add_map(self, map_img, name):
+        """
+        Add a quantitative map to the object. The either map or
+        layers will be resampled to a common space depending on the
+        `space` parameter of the `QLayers` object.
+
+        Parameters
+        ----------
+        map_img : nibabel.nifti1.Nifti1Image
+            Quantitative map to be added to the object
+        name : str
+            Name of the quantitative map to be added. This name will be used
+            as a column name in the output dataframe.
+        """
         self.maps.append(name)
         if map_img.ndim == 2:
             map_img = pad_dimensions(map_img)
@@ -88,6 +135,28 @@ class QLayers:
         raise NotImplementedError("Not yet implemented")
 
     def get_df(self, format="long"):
+        """
+        Returns a dataframe of all the quantitative maps added to the object
+        with the depth/layer of each voxel.
+
+        Parameters
+        ----------
+        format : {"wide", "long"}, optional
+            Default "long"
+            If "long", the dataframe is returned in a long
+            format where each row contains the depth, layer and a single
+            quantitative measurement for a voxel. If "wide", the dataframe is
+            returned in a wide format where each row contains the depth,
+            layer and all quantitative measurements for a voxel. This option
+            is only available if the `space` parameter of the `QLayers`
+            object is set to "layers".
+
+        Returns
+        -------
+        pandas.DataFrame
+            Dataframe of all quantitative maps added to the object with the
+            depth/layer of each voxel.
+        """
         if format == "wide":
             if self.space == "map":
                 raise NotImplementedError
@@ -96,15 +165,36 @@ class QLayers:
         elif format == "long":
             return self.df_long.dropna()
         else:
-            raise NotImplementedError
+            raise ValueError("format must be 'wide' or 'long'")
 
     def get_depth(self):
+        """
+        Returns distance from each voxel to the surface of the kidney as a
+        numpy array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Distance from each voxel to the surface of the kidney
+        """
         return self.depth
 
     def get_layers(self):
+        """
+        Returns layer of each voxel in the kidney as a numpy array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Layer of each voxel
+        """
         return self.layers
 
     def remove_all_maps(self):
+        """
+        Removes all quantitative maps from the object and resets the
+        dataframe to only contain depth/layer information.
+        """
         self.df_long = pd.DataFrame(
             columns=["depth", "layer", "measurement", "value"]
         )
@@ -115,20 +205,52 @@ class QLayers:
             self.df_wide["layer"] = self.layers[self.mask]
 
     def save_depth(self, fname):
+        """
+        Saves the depth map as a nifti file.
+
+        Parameters
+        ----------
+        fname : str
+            Filename to save the depth map to.
+        """
         depth_img = nib.Nifti1Image(self.depth, self.affine)
         nib.save(depth_img, fname)
 
     def save_layers(self, fname):
+        """
+        Saves the layers as a nifti file.
+
+        Parameters
+        ----------
+        fname : str
+            Filename to save the layers to.
+        """
         layer_img = nib.Nifti1Image(self.layers, self.affine)
         nib.save(layer_img, fname)
 
     def save_pelvis(self, fname):
+        """
+        Saves the pelvis segmentation as a nifti file.
+
+        Parameters
+        ----------
+        fname : str
+            Filename to save the pelvis segmentation to.
+        """
         if not hasattr(self, "pelvis"):
             self._segment_pelvis()
         pelvis_img = nib.Nifti1Image(self.pelvis.astype(np.int32), self.affine)
         nib.save(pelvis_img, fname)
 
     def _calculate_depth(self):
+        """
+        Calculates the distance from each voxel to the surface of the kidney.
+
+        Returns
+        -------
+        numpy.ndarray
+            Distance from each voxel to the surface of the kidney
+        """
         # Fill any holes in the mask with volume less than fill_ml
         # (measured in millileters)
         fill_vox = int(self.fill_ml / (np.prod(self.zoom) / 1000))
@@ -196,6 +318,10 @@ class QLayers:
         return depth
 
     def _segment_pelvis(self):
+        """
+        Segments the renal pelvis from the kidney mask and saves it as an
+        attribute of the object.
+        """
         fill_vox = int(self.fill_ml / (np.prod(self.zoom) / 1000))
         mask_filled = remove_small_holes(self.mask, fill_vox)
         mask_ch = convex_hull_objects(mask_filled)
