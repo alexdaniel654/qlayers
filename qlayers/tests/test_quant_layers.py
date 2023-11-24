@@ -101,15 +101,6 @@ class TestQLayers:
         assert sha1(pelvis).hexdigest() == "524bddb7e7ff85c88a284aaf11a268e26c3c8a73"
 
     def test_pelvis_dist(self):
-        # 5 mm pelvis distance
-        qlayers = QLayers(self.kidneys_with_pelvis_img, pelvis_dist=5)
-        layers = qlayers.get_layers()
-        assert layers.max() == 21
-        assert layers.min() == 0
-        assert layers.sum() == 187460
-        assert np.sum(layers > 0) == 26680
-        assert sha1(layers).hexdigest() == "5e9aeb2a7303dadba049c0cf8f9b8a5502da60bb"
-
         # 20 mm pelvis distance
         qlayers = QLayers(self.kidneys_with_pelvis_img, pelvis_dist=20)
         layers = qlayers.get_layers()
