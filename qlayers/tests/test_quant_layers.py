@@ -17,7 +17,9 @@ class TestQLayers:
     basic_map_data, _, _ = np.meshgrid(np.arange(32), np.ones(32), np.ones(32))
     basic_map_img = nib.Nifti1Image(basic_map_data.astype(np.int32), np.eye(4))
 
-    basic_map_low_res_data, _, _ = np.meshgrid(np.arange(16), np.ones(16), np.ones(16))
+    basic_map_low_res_data, _, _ = np.meshgrid(
+        np.arange(16), np.ones(16), np.ones(16)
+    )
     basic_map_low_res_img = nib.Nifti1Image(
         basic_map_low_res_data.astype(np.int32), np.eye(4) * 2
     )
@@ -51,7 +53,9 @@ class TestQLayers:
         assert np.sum(depth > 0) == 4096
 
     def test_basic_layers(self):
-        expected_layers = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
+        expected_layers = np.array(
+            [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+        )
         qlayers = QLayers(self.basic_img, thickness=1)
         layers = qlayers.get_layers()
         assert layers.max() == 9
@@ -100,7 +104,10 @@ class TestQLayers:
         qlayers._segment_pelvis()
         pelvis = qlayers.pelvis
         assert pelvis.sum() == 640
-        assert sha1(pelvis).hexdigest() == "524bddb7e7ff85c88a284aaf11a268e26c3c8a73"
+        assert (
+            sha1(pelvis).hexdigest()
+            == "524bddb7e7ff85c88a284aaf11a268e26c3c8a73"
+        )
 
     def test_pelvis_dist(self):
         # 20 mm pelvis distance
@@ -110,7 +117,10 @@ class TestQLayers:
         assert layers.min() == 0
         assert layers.sum() == 121868
         assert np.sum(layers > 0) == 18984
-        assert sha1(layers).hexdigest() == "0b23f5f58a19d901902f135c83d388df2290268d"
+        assert (
+            sha1(layers).hexdigest()
+            == "0b23f5f58a19d901902f135c83d388df2290268d"
+        )
 
     def test_save(self):
         qlayers = QLayers(self.kidneys_with_pelvis_img)
@@ -185,7 +195,12 @@ class TestQLayers:
         assert qlayers.maps[0] == "t1"
         df_long = qlayers.get_df(format="long")
         assert df_long.shape == (4096, 4)
-        assert df_long.columns.tolist() == ["depth", "layer", "measurement", "value"]
+        assert df_long.columns.tolist() == [
+            "depth",
+            "layer",
+            "measurement",
+            "value",
+        ]
         assert df_long["measurement"].unique().tolist() == ["t1"]
         df_wide = qlayers.get_df(format="wide")
         assert df_wide.shape == (4096, 3)
@@ -196,7 +211,12 @@ class TestQLayers:
         assert qlayers.maps == ["t1", "t2"]
         df_long = qlayers.get_df(format="long")
         assert df_long.shape == (8192, 4)
-        assert df_long.columns.tolist() == ["depth", "layer", "measurement", "value"]
+        assert df_long.columns.tolist() == [
+            "depth",
+            "layer",
+            "measurement",
+            "value",
+        ]
         assert df_long["measurement"].unique().tolist() == ["t1", "t2"]
         df_wide = qlayers.get_df(format="wide")
         assert df_wide.shape == (4096, 4)
@@ -209,7 +229,12 @@ class TestQLayers:
         assert qlayers.maps[0] == "t1"
         df_long = qlayers.get_df(format="long")
         assert df_long.shape == (512, 4)
-        assert df_long.columns.tolist() == ["depth", "layer", "measurement", "value"]
+        assert df_long.columns.tolist() == [
+            "depth",
+            "layer",
+            "measurement",
+            "value",
+        ]
         assert df_long["measurement"].unique().tolist() == ["t1"]
 
         qlayers.add_map(self.basic_map_img, "t2")
@@ -217,7 +242,12 @@ class TestQLayers:
         assert qlayers.maps == ["t1", "t2"]
         df_long = qlayers.get_df(format="long")
         assert df_long.shape == (512 + 4096, 4)
-        assert df_long.columns.tolist() == ["depth", "layer", "measurement", "value"]
+        assert df_long.columns.tolist() == [
+            "depth",
+            "layer",
+            "measurement",
+            "value",
+        ]
         assert df_long["measurement"].unique().tolist() == ["t1", "t2"]
         with pytest.raises(NotImplementedError):
             df_wide = qlayers.get_df(format="wide")

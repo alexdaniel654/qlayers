@@ -11,7 +11,9 @@ from .utils import convex_hull_objects, pad_dimensions
 
 
 class QLayers:
-    def __init__(self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"):
+    def __init__(
+        self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"
+    ):
         self.mask_img = mask_img
         self.mask = mask_img.get_fdata() > 0.5
         self.zoom = mask_img.header.get_zooms()
@@ -21,9 +23,13 @@ class QLayers:
         self.pelvis_dist = pelvis_dist
         self.space = space
         self.depth = self._calculate_depth()
-        self.layers = np.ceil(self.depth * (1 / self.thickness)) / (1 / self.thickness)
+        self.layers = np.ceil(self.depth * (1 / self.thickness)) / (
+            1 / self.thickness
+        )
         self.layers_list = np.unique(self.layers)
-        self.df_long = pd.DataFrame(columns=["depth", "layer", "measurement", "value"])
+        self.df_long = pd.DataFrame(
+            columns=["depth", "layer", "measurement", "value"]
+        )
         self.maps = []
         if self.space == "layers":
             self.df_wide = pd.DataFrame(columns=["depth", "layer"])
@@ -37,12 +43,17 @@ class QLayers:
 
         if self.space == "layers":
             # Resample map into space of layers
-            # Doing cval as a big and unusual number as cval=np.nan doesn't work
-            map_img = resample_from_to(map_img, self.mask_img, cval=np.pi * np.e * 1e10)
+            # Doing cval as a big and unusual number as cval=np.nan doesn't
+            # work
+            map_img = resample_from_to(
+                map_img, self.mask_img, cval=np.pi * np.e * 1e10
+            )
             map_data = map_img.get_fdata()
             map_data[map_data == np.pi * np.e * 1e10] = np.nan
             self.df_wide[name] = map_data[self.mask]
-            sub_df = pd.DataFrame(columns=["depth", "layer", "measurement", "value"])
+            sub_df = pd.DataFrame(
+                columns=["depth", "layer", "measurement", "value"]
+            )
             sub_df["depth"] = self.depth[self.mask]
             sub_df["layer"] = self.layers[self.mask]
             sub_df["measurement"] = name
@@ -63,7 +74,9 @@ class QLayers:
             mask_rs = mask_img_rs.get_fdata() > 0.5
             map_data = map_img.get_fdata()
 
-            sub_df = pd.DataFrame(columns=["depth", "layer", "measurement", "value"])
+            sub_df = pd.DataFrame(
+                columns=["depth", "layer", "measurement", "value"]
+            )
             sub_df["depth"] = depth_rs[mask_rs]
             sub_df["layer"] = layers_rs[mask_rs]
             sub_df["measurement"] = name
@@ -81,7 +94,6 @@ class QLayers:
             else:
                 return self.df_wide
         elif format == "long":
-            # df_long = self.df_wide.melt(id_vars='layer', value_vars=self.maps, var_name='measurement').dropna()
             return self.df_long.dropna()
         else:
             raise NotImplementedError
@@ -93,7 +105,9 @@ class QLayers:
         return self.layers
 
     def remove_all_maps(self):
-        self.df_long = pd.DataFrame(columns=["depth", "layer", "measurement", "value"])
+        self.df_long = pd.DataFrame(
+            columns=["depth", "layer", "measurement", "value"]
+        )
         self.maps = []
         if self.space == "layers":
             self.df_wide = pd.DataFrame(columns=["depth", "layer"])
@@ -115,16 +129,23 @@ class QLayers:
         nib.save(pelvis_img, fname)
 
     def _calculate_depth(self):
-        # Fill any holes in the mask with volume less than fill_ml (measured in millileters)
+        # Fill any holes in the mask with volume less than fill_ml
+        # (measured in millileters)
         fill_vox = int(self.fill_ml / (np.prod(self.zoom) / 1000))
         mask_filled = remove_small_holes(self.mask, fill_vox)
 
-        # Convert the voxel mask into a mesh using the marching cubes algorithm and trimesh
+        # Convert the voxel mask into a mesh using the marching cubes
+        # algorithm and trimesh
         print("Making Mesh")
         verts, faces, normals, _ = marching_cubes(
-            mask_filled.astype(np.uint8), spacing=self.zoom, level=0.5, step_size=1.0
+            mask_filled.astype(np.uint8),
+            spacing=self.zoom,
+            level=0.5,
+            step_size=1.0,
         )
-        mesh = trimesh.Trimesh(vertices=verts, faces=faces, vertex_normals=normals)
+        mesh = trimesh.Trimesh(
+            vertices=verts, faces=faces, vertex_normals=normals
+        )
 
         # Smooth the resulting mesh
         print("Smoothing Mesh")
@@ -144,7 +165,9 @@ class QLayers:
         # Find the nearest surface to each point inside the kidney
         points = points[self.mask.reshape(-1) > 0.5]
         print("Calculating Distances")
-        (closest_points, distances, triangle_id) = mesh.nearest.on_surface(points)
+        (closest_points, distances, triangle_id) = mesh.nearest.on_surface(
+            points
+        )
 
         # Write these distances to voxels in the shape of the original image
         depth = np.zeros(self.mask.shape)
@@ -161,9 +184,11 @@ class QLayers:
             mesh_p = trimesh.Trimesh(
                 vertices=verts_p, faces=faces_p, vertex_normals=normals_p
             )
-            (closest_points_p, distances_p, triangle_id_p) = mesh_p.nearest.on_surface(
-                points
-            )
+            (
+                closest_points_p,
+                distances_p,
+                triangle_id_p,
+            ) = mesh_p.nearest.on_surface(points)
             depth_p = np.zeros(self.mask.shape)
             depth_p[self.mask > 0.5] = distances_p
             depth[depth_p < self.pelvis_dist] = 0
