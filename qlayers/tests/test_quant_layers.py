@@ -15,10 +15,12 @@ class TestQLayers:
     basic_img = nib.Nifti1Image(basic_data, np.eye(4))
 
     basic_map_data, _, _ = np.meshgrid(np.arange(32), np.ones(32), np.ones(32))
-    basic_map_img = nib.Nifti1Image(basic_map_data, np.eye(4))
+    basic_map_img = nib.Nifti1Image(basic_map_data.astype(np.int32), np.eye(4))
 
     basic_map_low_res_data, _, _ = np.meshgrid(np.arange(16), np.ones(16), np.ones(16))
-    basic_map_low_res_img = nib.Nifti1Image(basic_map_low_res_data, np.eye(4) * 2)
+    basic_map_low_res_img = nib.Nifti1Image(
+        basic_map_low_res_data.astype(np.int32), np.eye(4) * 2
+    )
 
     basic_data_with_cyst = np.zeros((32, 32, 32))
     basic_data_with_cyst[8:24, 8:24, 8:24] = 1
