@@ -20,6 +20,13 @@ class TestQLayers:
     basic_map_data, _, _ = np.meshgrid(np.arange(32), np.ones(32), np.ones(32))
     basic_map_img = nib.Nifti1Image(basic_map_data.astype(np.int32), np.eye(4))
 
+    # Generate a 16 x 16 x 16 cube in a 32 x 32 x 32 image where half the
+    # cube is 1 and the other half is 2. This is to simulate tissue labels
+    basic_tissue_data = np.zeros((32, 32, 32))
+    basic_tissue_data[8:16, 8:24, 8:24] = 1
+    basic_tissue_data[16:24, 8:24, 8:24] = 2
+    basic_tissue_img = nib.Nifti1Image(basic_tissue_data, np.eye(4))
+
     # Generate a low resolution version of the map above (with 2 mm voxels)
     basic_map_low_res_data, _, _ = np.meshgrid(
         np.arange(16), np.ones(16), np.ones(16)
@@ -150,6 +157,10 @@ class TestQLayers:
             os.remove(os.path.join("test_output", f))
         shutil.rmtree("test_output")
 
+    def test_not_a_space(self):
+        with pytest.raises(ValueError):
+            QLayers(self.basic_img, space="invalid")
+
     def test_add_map_layer_space(self):
         qlayers = QLayers(self.basic_img, space="layers")
         qlayers.add_map(self.basic_map_img, "t1")
@@ -262,3 +273,67 @@ class TestQLayers:
         assert df_long["measurement"].unique().tolist() == ["t1", "t2"]
         with pytest.raises(NotImplementedError):
             df_wide = qlayers.get_df(format="wide")
+
+    def test_add_tissue_layer_space(self):
+        # Adding the tissue, then the map
+        qlayers = QLayers(self.basic_img, space="layers")
+        qlayers.add_tissue(self.basic_tissue_img)
+        qlayers.add_map(self.basic_map_img, "t1")
+        qlayers.add_map(self.basic_map_low_res_img, "t2")
+        assert len(qlayers.maps) == 2
+        df = qlayers.get_df(format="long")
+        assert df.shape == (8192, 5)
+        assert df.columns.tolist() == [
+            "depth",
+            "layer",
+            "tissue",
+            "measurement",
+            "value",
+        ]
+        assert df["measurement"].unique().tolist() == ["t1", "t2"]
+        npt.assert_array_almost_equal(
+            df.mean(numeric_only=True).values,
+            np.array([2.2367, 2.5698, 1.5, 11.62]),
+            decimal=2,
+        )
+        df = qlayers.get_df(format="wide")
+        assert df.shape == (4096, 5)
+        assert df.columns.tolist() == ["depth", "layer", "tissue", "t1", "t2"]
+        npt.assert_array_almost_equal(
+            df.mean(numeric_only=True).values,
+            np.array([2.2367, 2.5698, 1.5, 15.500, 7.75]),
+            decimal=2,
+        )
+        with pytest.raises(ValueError):
+            qlayers = QLayers(self.basic_img, space="layers")
+            qlayers.add_map(self.basic_map_img, "t1")
+            qlayers.add_tissue(self.basic_tissue_img)
+
+    def test_add_tissue_map_space(self):
+        # Adding the tissue, then the map
+        qlayers = QLayers(self.basic_img, space="map")
+        qlayers.add_tissue(self.basic_tissue_img)
+        qlayers.add_map(self.basic_map_img, "t1")
+        qlayers.add_map(self.basic_map_low_res_img, "t2")
+        assert len(qlayers.maps) == 2
+        df = qlayers.get_df(format="long")
+        assert df.shape == (4608, 5)
+        assert df.columns.tolist() == [
+            "depth",
+            "layer",
+            "tissue",
+            "measurement",
+            "value",
+        ]
+        assert df["measurement"].unique().tolist() == ["t1", "t2"]
+        npt.assert_array_almost_equal(
+            df.mean(numeric_only=True).values,
+            np.array([2.2367, 2.5698, 1.5, 14.61]),
+            decimal=2,
+        )
+        with pytest.raises(ValueError):
+            qlayers = QLayers(self.basic_img, space="layers")
+            qlayers.add_map(self.basic_map_img, "t1")
+            qlayers.add_tissue(self.basic_tissue_img)
+
+    # TODO tests with tissue labels

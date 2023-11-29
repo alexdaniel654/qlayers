@@ -45,6 +45,8 @@ class QLayers:
         quantitative measurements for a voxel.
     """
 
+    # TODO add verbose option
+
     def __init__(
         self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"
     ):
@@ -55,6 +57,8 @@ class QLayers:
         self.thickness = thickness
         self.fill_ml = fill_ml
         self.pelvis_dist = pelvis_dist
+        if space not in ["map", "layers"]:
+            raise ValueError("space must be 'map' or 'layers'")
         self.space = space
         self.depth = self._calculate_depth()
         self.layers = np.ceil(self.depth * (1 / self.thickness)) / (
@@ -65,6 +69,9 @@ class QLayers:
             columns=["depth", "layer", "measurement", "value"]
         )
         self.maps = []
+        self._tissue_data_ls = None
+        self._tissue_labels = None
+        self._tissue_img = None
         if self.space == "layers":
             self.df_wide = pd.DataFrame(columns=["depth", "layer"])
             self.df_wide["depth"] = self.depth[self.mask]
@@ -89,18 +96,28 @@ class QLayers:
             map_img = pad_dimensions(map_img)
 
         if self.space == "layers":
-            # Resample map into space of layers
-            # Doing cval as a big and unusual number as cval=np.nan doesn't
-            # work
-            map_img = resample_from_to(
-                map_img, self.mask_img, cval=np.pi * np.e * 1e10
-            )
+            # Resample map into space of layers. Doing cval as a big and
+            # unusual number as cval=np.nan doesn't work
+            map_img = resample_from_to(map_img, self.mask_img, cval=2**16 - 2)
             map_data = map_img.get_fdata()
-            map_data[map_data == np.pi * np.e * 1e10] = np.nan
+            map_data[map_data == 2**16 - 2] = np.nan
             self.df_wide[name] = map_data[self.mask]
-            sub_df = pd.DataFrame(
-                columns=["depth", "layer", "measurement", "value"]
-            )
+
+            if self._tissue_img is None:
+                sub_df = pd.DataFrame(
+                    columns=["depth", "layer", "measurement", "value"]
+                )
+            else:
+                sub_df = pd.DataFrame(
+                    columns=[
+                        "depth",
+                        "layer",
+                        "tissue",
+                        "measurement",
+                        "value",
+                    ]
+                )
+                sub_df["tissue"] = self._tissue_data_ls[self.mask]
             sub_df["depth"] = self.depth[self.mask]
             sub_df["layer"] = self.layers[self.mask]
             sub_df["measurement"] = name
@@ -121,18 +138,47 @@ class QLayers:
             mask_rs = mask_img_rs.get_fdata() > 0.5
             map_data = map_img.get_fdata()
 
-            sub_df = pd.DataFrame(
-                columns=["depth", "layer", "measurement", "value"]
-            )
+            if self._tissue_img is None:
+                sub_df = pd.DataFrame(
+                    columns=["depth", "layer", "measurement", "value"]
+                )
+            else:
+                sub_df = pd.DataFrame(
+                    columns=["depth", "layer", "tissue", "measurement", "value"]
+                )
+                tissue_rs = resample_from_to(
+                    self._tissue_img, map_img, order=0
+                ).get_fdata()
+                sub_df["tissue"] = tissue_rs[mask_rs]
             sub_df["depth"] = depth_rs[mask_rs]
             sub_df["layer"] = layers_rs[mask_rs]
             sub_df["measurement"] = name
             sub_df["value"] = map_data[mask_rs]
             self.df_long = pd.concat([self.df_long, sub_df])
 
-    def add_tissue(self, tissue_img):
-        # TODO add_tissue method
-        raise NotImplementedError("Not yet implemented")
+    def add_tissue(self, tissue_img, tissue_labels=None):
+        if len(self.maps) > 0:
+            raise ValueError(
+                "Tissue labels must be added before any quantitative maps."
+            )
+
+        self._tissue_img = tissue_img
+        self._tissue_labels = tissue_labels
+        self._tissue_data_ls = resample_from_to(
+            tissue_img, self.mask_img, order=0, cval=2**16 - 2
+        ).get_fdata()
+        self._tissue_data_ls[self._tissue_data_ls == 2**16 - 2] = np.nan
+
+        if self._tissue_labels is not None:
+            if len(np.unique(np.nan_to_num(self._tissue_data_ls))) - 1 != len(
+                self._tissue_labels
+            ):
+                raise ValueError(
+                    "Number of tissue labels must equal number of unique "
+                    "non-zero values in tissue image."
+                )
+        if self.space == "layers":
+            self.df_wide["tissue"] = self._tissue_data_ls[self.mask]
 
     def get_df(self, format="long"):
         """
@@ -157,13 +203,36 @@ class QLayers:
             Dataframe of all quantitative maps added to the object with the
             depth/layer of each voxel.
         """
+        if self._tissue_labels is not None:
+            for ind, label in enumerate(self._tissue_labels):
+                self.df_long.loc[
+                    self.df_long["tissue"] == ind, "tissue"
+                ] = label
+            if self.space == "layers":
+                for ind, label in enumerate(self._tissue_labels):
+                    self.df_wide.loc[
+                        self.df_wide["tissue"] == ind, "tissue"
+                    ] = label
+
         if format == "wide":
             if self.space == "map":
-                raise NotImplementedError
+                raise NotImplementedError(
+                    "Data cannot be retrieved in wide "
+                    "format when space is 'map'. This "
+                    "is because each quantitative map "
+                    "is in a different space so each "
+                    "row of a wide dataframe would not "
+                    "come from the same space in the "
+                    "kidney."
+                )
             else:
                 return self.df_wide
         elif format == "long":
-            return self.df_long.dropna()
+            if "tissue" in self.df_long.columns:
+                self.df_long = self.df_long[
+                    ["depth", "layer", "tissue", "measurement", "value"]
+                ]
+            return self.df_long
         else:
             raise ValueError("format must be 'wide' or 'long'")
 
@@ -195,14 +264,22 @@ class QLayers:
         Removes all quantitative maps from the object and resets the
         dataframe to only contain depth/layer information.
         """
-        self.df_long = pd.DataFrame(
-            columns=["depth", "layer", "measurement", "value"]
-        )
         self.maps = []
+        if self._tissue_img is None:
+            self.df_long = pd.DataFrame(
+                columns=["depth", "layer", "measurement", "value"]
+            )
+        else:
+            self.df_long = pd.DataFrame(
+                columns=["depth", "layer", "tissue", "measurement", "value"]
+            )
+
         if self.space == "layers":
             self.df_wide = pd.DataFrame(columns=["depth", "layer"])
             self.df_wide["depth"] = self.depth[self.mask]
             self.df_wide["layer"] = self.layers[self.mask]
+            if self._tissue_img is not None:
+                self.df_wide["tissue"] = self._tissue_data_ls[self.mask]
 
     def save_depth(self, fname):
         """
