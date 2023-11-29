@@ -180,7 +180,16 @@ class TestQLayers:
         assert qlayers.maps[1] == "t2"
 
     def test_remove_maps(self):
+        # Without tissues
         qlayers = QLayers(self.basic_img, space="layers")
+        qlayers.add_map(self.basic_map_img, "t1")
+        qlayers.add_map(self.basic_map_img, "t2")
+        qlayers.remove_all_maps()
+        assert len(qlayers.maps) == 0
+
+        # With tissues
+        qlayers = QLayers(self.basic_img, space="layers")
+        qlayers.add_tissue(self.basic_tissue_img)
         qlayers.add_map(self.basic_map_img, "t1")
         qlayers.add_map(self.basic_map_img, "t2")
         qlayers.remove_all_maps()

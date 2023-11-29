@@ -157,6 +157,26 @@ class QLayers:
             self.df_long = pd.concat([self.df_long, sub_df])
 
     def add_tissue(self, tissue_img, tissue_labels=None):
+        """
+        Add a tissue segmentation image to the object. This segmentation
+        should contain integer labels for each tissue type in the kidney
+        where 0 is background. The labels will be used in the output
+        dataframe. The tissue segmentation will be resampled to the space of
+        the layers if the `space` parameter of the `QLayers` object is set
+        to "layers" or the space of the quantitative maps added if the
+        `space` parameter is set to "map".
+
+        Parameters
+        ----------
+        tissue_img : nibabel.nifti1.Nifti1Image
+            Tissue segmentation image to be added to the object
+        tissue_labels : list of str, optional
+            Default None
+            List of text labels for each tissue type in the segmentation
+            e.g. ["cortex", "medulla"] if 1 in `tissue_img` represents
+            renal cortex and 2 represents medulla. If None, the integer labels
+            from `tissue_img` will be used.
+        """
         if len(self.maps) > 0:
             raise ValueError(
                 "Tissue labels must be added before any quantitative maps."
