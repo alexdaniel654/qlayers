@@ -29,7 +29,9 @@ class TestQLayers:
 
     # A single 2D slice of basic_map_img
     basic_map_data_2d = basic_map_data[:, :, 16]
-    basic_map_img_2d = nib.Nifti1Image(basic_map_data_2d, np.eye(4))
+    basic_map_img_2d = nib.Nifti1Image(
+        basic_map_data_2d.astype(np.int32), np.eye(4)
+    )
 
     # Generate a low resolution version of the map above (with 2 mm voxels)
     basic_map_low_res_data, _, _ = np.meshgrid(
