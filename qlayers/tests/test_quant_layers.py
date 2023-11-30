@@ -27,6 +27,10 @@ class TestQLayers:
     basic_tissue_data[16:24, 8:24, 8:24] = 2
     basic_tissue_img = nib.Nifti1Image(basic_tissue_data, np.eye(4))
 
+    # A single 2D slice of basic_map_img
+    basic_map_data_2d = basic_map_data[:, :, 16]
+    basic_map_img_2d = nib.Nifti1Image(basic_map_data_2d, np.eye(4))
+
     # Generate a low resolution version of the map above (with 2 mm voxels)
     basic_map_low_res_data, _, _ = np.meshgrid(
         np.arange(16), np.ones(16), np.ones(16)
@@ -176,6 +180,25 @@ class TestQLayers:
         assert len(qlayers.maps) == 1
         assert qlayers.maps[0] == "t1"
         qlayers.add_map(self.basic_map_img, "t2")
+        assert len(qlayers.maps) == 2
+        assert qlayers.maps[1] == "t2"
+
+    def test_add_map_2d(self):
+        # Layers space
+        qlayers = QLayers(self.basic_img, space="layers")
+        qlayers.add_map(self.basic_map_img_2d, "t1")
+        assert len(qlayers.maps) == 1
+        assert qlayers.maps[0] == "t1"
+        qlayers.add_map(self.basic_map_img_2d, "t2")
+        assert len(qlayers.maps) == 2
+        assert qlayers.maps[1] == "t2"
+
+        # Map space
+        qlayers = QLayers(self.basic_img, space="map")
+        qlayers.add_map(self.basic_map_img_2d, "t1")
+        assert len(qlayers.maps) == 1
+        assert qlayers.maps[0] == "t1"
+        qlayers.add_map(self.basic_map_img_2d, "t2")
         assert len(qlayers.maps) == 2
         assert qlayers.maps[1] == "t2"
 
@@ -345,4 +368,41 @@ class TestQLayers:
             qlayers.add_map(self.basic_map_img, "t1")
             qlayers.add_tissue(self.basic_tissue_img)
 
-    # TODO tests with tissue labels
+    def test_tissue_text_labels(self):
+        # Layers space
+        qlayers = QLayers(self.basic_img, space="layers")
+        qlayers.add_tissue(
+            self.basic_tissue_img, tissue_labels=["cortex", "medulla"]
+        )
+        qlayers.add_map(self.basic_map_img, "t1")
+        df_long = qlayers.get_df(format="long")
+        assert df_long["tissue"].unique().tolist() == ["cortex", "medulla"]
+        df_wide = qlayers.get_df(format="wide")
+        assert df_wide["tissue"].unique().tolist() == ["cortex", "medulla"]
+
+        # Map space
+        qlayers = QLayers(self.basic_img, space="map")
+        qlayers.add_tissue(
+            self.basic_tissue_img, tissue_labels=["cortex", "medulla"]
+        )
+        qlayers.add_map(self.basic_map_img, "t1")
+        df_long = qlayers.get_df(format="long")
+        assert df_long["tissue"].unique().tolist() == ["cortex", "medulla"]
+
+        # Not enough labels
+        with pytest.raises(ValueError):
+            qlayers = QLayers(self.basic_img, space="layers")
+            qlayers.add_tissue(self.basic_tissue_img, tissue_labels=["cortex"])
+
+        # Too many labels
+        with pytest.raises(ValueError):
+            qlayers = QLayers(self.basic_img, space="layers")
+            qlayers.add_tissue(
+                self.basic_tissue_img,
+                tissue_labels=["inner cortex", "outer cortex", "medulla"],
+            )
+
+        # Labels not a list
+        with pytest.raises(ValueError):
+            qlayers = QLayers(self.basic_img, space="layers")
+            qlayers.add_tissue(self.basic_tissue_img, tissue_labels="cortex")

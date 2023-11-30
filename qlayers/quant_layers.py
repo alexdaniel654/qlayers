@@ -224,12 +224,17 @@ class QLayers:
             depth/layer of each voxel.
         """
         if self._tissue_labels is not None:
-            for ind, label in enumerate(self._tissue_labels):
+            for ind, label in zip(
+                self.df_long["tissue"].unique(), self._tissue_labels
+            ):
                 self.df_long.loc[
                     self.df_long["tissue"] == ind, "tissue"
                 ] = label
             if self.space == "layers":
-                for ind, label in enumerate(self._tissue_labels):
+                for ind, label in zip(
+                    self.df_wide["tissue"].unique(),
+                    self._tissue_labels,
+                ):
                     self.df_wide.loc[
                         self.df_wide["tissue"] == ind, "tissue"
                     ] = label
