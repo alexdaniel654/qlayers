@@ -43,7 +43,7 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
 )
 ```
 
-<img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/master/examples/example_t2star_profile.png" height="250">
+<img src="examples%2Fexample_t2star_profile.png" height="360">
 
 ## Theory
 
@@ -59,7 +59,8 @@ apply the layer to any quantitative parameter.
 ### Generating Layers
 
 Layers are generated via the process outlined in the figure below.
-<img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/master/examples/flowchart. png" height="360">
+
+<img src="examples%2Fflowchart.png" width="50%">
 
 a i. Shows the mask thats input to the `QLayers` class. This mask then has any holes smaller than `fill_ml` filled as these are
 most likely cysts
