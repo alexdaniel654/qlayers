@@ -188,6 +188,7 @@ class QLayers:
             tissue_img, self.mask_img, order=0, cval=2**16 - 2
         ).get_fdata()
         self._tissue_data_ls[self._tissue_data_ls == 2**16 - 2] = np.nan
+        self._tissue_data_ls[self._tissue_data_ls == 0] = np.nan
 
         if self._tissue_labels is not None:
             if len(np.unique(np.nan_to_num(self._tissue_data_ls))) - 1 != len(
@@ -224,13 +225,16 @@ class QLayers:
             depth/layer of each voxel.
         """
         if self._tissue_labels is not None:
-            for ind, label in zip(
-                self.df_long["tissue"].unique(), self._tissue_labels
-            ):
-                self.df_long.loc[
-                    self.df_long["tissue"] == ind, "tissue"
-                ] = label
+            if len(self.df_long) > 0:
+                self.df_long = self.df_long.dropna(subset=["tissue"])
+                for ind, label in zip(
+                    self.df_long["tissue"].unique(), self._tissue_labels
+                ):
+                    self.df_long.loc[
+                        self.df_long["tissue"] == ind, "tissue"
+                    ] = label
             if self.space == "layers":
+                self.df_wide = self.df_wide.dropna(subset=["tissue"])
                 for ind, label in zip(
                     self.df_wide["tissue"].unique(),
                     self._tissue_labels,
