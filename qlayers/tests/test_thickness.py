@@ -47,8 +47,19 @@ class TestEquationSystem:
 
 
 class TestCorticalThickness:
+    def test_cortical_thickness_raises_error_for_wrong_space(self):
+        class MockQLayers:
+            def __init__(self):
+                self.space = "map"
+
+        with pytest.raises(ValueError):
+            cortical_thickness(MockQLayers())
+
     def test_cortical_thickness_raises_error_for_missing_tissue_column(self):
         class MockQLayers:
+            def __init__(self):
+                self.space = "layers"
+
             def get_df(self, _):
                 return pd.DataFrame({"depth": [0, 1, 2, 3, 4, 5]})
 
@@ -57,6 +68,9 @@ class TestCorticalThickness:
 
     def test_cortical_thickness_raises_error_for_wrong_tissue_column(self):
         class MockQLayers:
+            def __init__(self):
+                self.space = "layers"
+
             def get_df(self, _):
                 return pd.DataFrame(
                     {
@@ -77,6 +91,9 @@ class TestCorticalThickness:
 
     def test_cortical_thickness_returns_expected_value(self):
         class MockQLayers:
+            def __init__(self):
+                self.space = "layers"
+
             def get_df(self, _):
                 # Range of depths
                 x = np.linspace(0, 20, 50)

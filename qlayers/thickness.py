@@ -144,6 +144,11 @@ def cortical_thickness(qlayers):
     float
         The cortical depth.
     """
+    if qlayers.space != "layers":
+        raise ValueError(
+            "Cortical thickness can only be computed if the "
+            "QLayers object is in layers space"
+        )
     df = qlayers.get_df("wide")
     if "tissue" not in df.columns:
         raise ValueError(
