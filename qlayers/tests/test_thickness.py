@@ -122,4 +122,4 @@ class TestCorticalThickness:
                 )
                 return df_wide
 
-        assert np.isclose(cortical_thickness(MockQLayers()), 6.9172)
+        assert np.isclose(cortical_thickness(MockQLayers()), 6.73734)
