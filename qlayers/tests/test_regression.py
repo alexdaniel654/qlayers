@@ -14,7 +14,19 @@ class TestSlope:
             self.maps = ["t1", "t2"]
 
         def get_df(self, format="wide"):
-            return pd.DataFrame(
+            if format == "long":
+                df = pd.DataFrame(
+                    {
+                        "depth": np.tile(np.linspace(0, 20, 50), 2),
+                        "measurement": np.repeat(["t1", "t2"], 50),
+                        "value": np.concatenate((np.linspace(1000, 2000, 50)
+                                                 + np.random.randn(50) * 10,
+                                                 np.linspace(100, 200,50)
+                                                 + np.random.randn(50))),
+                    }
+                )
+            elif format == "wide":
+                df = pd.DataFrame(
                 {
                     "depth": np.linspace(0, 20, 50),
                     "t1": np.linspace(1000, 2000, 50)
@@ -22,6 +34,7 @@ class TestSlope:
                     "t2": np.linspace(100, 200, 50) + np.random.randn(50),
                 }
             )
+            return df
 
     def test_slope_with_invalid_space(self):
         qlayers = self.MockQLayers()

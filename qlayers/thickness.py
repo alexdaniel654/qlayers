@@ -150,6 +150,9 @@ def cortical_thickness(qlayers):
             "QLayers object is in layers space"
         )
     df = qlayers.get_df("wide")
+    df = df.dropna()
+    df = df[df["depth"] > 0]
+
     if "tissue" not in df.columns:
         raise ValueError(
             "Cortical thickness can only be computed if tissue "

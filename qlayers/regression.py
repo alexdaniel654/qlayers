@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.stats import linregress
 
 
-def slope(qlayers, maps="all", outer=5.0, inner=15.0, unit="mm", agg=np.median):
+def slope(qlayers, maps="all", outer=5.0, inner=15.0, unit="mm", agg=np.nanmedian):
     """
     Explore the profiles produced by the layers algorithm. Calculate summary
     statistics for the outer layers, inner layers and the gradient between the
@@ -54,10 +54,11 @@ def slope(qlayers, maps="all", outer=5.0, inner=15.0, unit="mm", agg=np.median):
     if unit not in ["mm", "percent", "prop"]:
         raise ValueError("unit must be one of 'mm', 'percent' or 'prop'")
 
-    df = qlayers.get_df("wide")
+    df = qlayers.get_df("long")
+    df = df.dropna()
 
     if maps == "all":
-        maps = qlayers.maps
+        maps = df['measurement'].unique().tolist()
 
     if unit == "percent":
         outer = (outer / 100) * df["depth"].max()
@@ -73,18 +74,32 @@ def slope(qlayers, maps="all", outer=5.0, inner=15.0, unit="mm", agg=np.median):
         columns=["inner", "outer", "grad", "inner_std", "outer_std", "grad_se"],
     )
     for m in maps:
-        if m not in df.columns:
+        if m not in df['measurement'].unique():
             raise ValueError(f"{m} is not a valid map")
 
-        results_df.loc[m, "outer"] = agg(df.loc[df["depth"] < outer, m])
-        results_df.loc[m, "inner"] = agg(df.loc[df["depth"] > inner, m])
+        results_df.loc[m, "outer"] = agg(df.loc[(df["depth"] < outer) &
+                                                (df["measurement"] == m),
+                                                'value'])
+        results_df.loc[m, "inner"] = agg(df.loc[(df["depth"] > inner) &
+                                                (df["measurement"] == m),
+                                                'value'])
         reg = linregress(
-            df.loc[(df["depth"] > outer) & (df["depth"] < inner), "depth"],
-            df.loc[(df["depth"] > outer) & (df["depth"] < inner), m],
+            df.loc[(df["depth"] > outer) &
+                   (df["depth"] < inner) &
+                   (df["measurement"] == m), "depth"],
+            df.loc[(df["depth"] > outer) &
+                   (df["depth"] < inner) &
+                   (df["measurement"] == m), 'value'],
         )
         results_df.loc[m, "grad"] = reg.slope
-        results_df.loc[m, "outer_std"] = np.std(df.loc[df["depth"] < outer, m])
-        results_df.loc[m, "inner_std"] = np.std(df.loc[df["depth"] > inner, m])
+        results_df.loc[m, "outer_std"] = (
+            np.std(df.loc[(df["depth"] < outer) &
+                          (df["measurement"] == m),
+                          'value']))
+        results_df.loc[m, "inner_std"] = (
+            np.std(df.loc[(df["depth"] > inner) &
+                          (df["measurement"] == m),
+                          'value']))
         results_df.loc[m, "grad_se"] = reg.stderr
 
     return results_df
