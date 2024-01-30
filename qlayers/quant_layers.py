@@ -4,7 +4,9 @@ import pandas as pd
 import trimesh
 from nibabel.processing import resample_from_to
 from skimage.measure import marching_cubes
-from skimage.morphology import opening, remove_small_holes, remove_small_objects
+from skimage.morphology import (opening, remove_small_holes,
+                                remove_small_objects)
+from tqdm import tqdm
 from trimesh import smoothing
 
 from .utils import convex_hull_objects, pad_dimensions
@@ -255,13 +257,13 @@ class QLayers:
                     "kidney."
                 )
             else:
-                return self.df_wide
+                return self.df_wide.loc[self.df_wide["depth"] > 0]
         elif format == "long":
             if "tissue" in self.df_long.columns:
                 self.df_long = self.df_long[
                     ["depth", "layer", "tissue", "measurement", "value"]
                 ]
-            return self.df_long
+            return self.df_long.loc[self.df_long["depth"] > 0]
         else:
             raise ValueError("format must be 'wide' or 'long'")
 
@@ -392,16 +394,24 @@ class QLayers:
 
         # Find the nearest surface to each point inside the kidney
         points = points[self.mask.reshape(-1) > 0.5]
-        print("Calculating Distances")
-        (closest_points, distances, triangle_id) = mesh.nearest.on_surface(
-            points
-        )
+        batch_size = 10000
+        batches = np.ceil(len(points) / batch_size).astype(int)
+        distances = np.zeros(len(points))
+        i = 0
+        # print("Calculating Distances")
+        with tqdm(total=batches, desc="Distance Calculation") as pbar:
+            while i < len(points):
+                (closest_points, dist, triangle_id) = mesh.nearest.on_surface(
+                    points[i:i + batch_size]
+                )
+                distances[i:i + batch_size] = dist
+                i += batch_size
+                pbar.update()
 
         # Write these distances to voxels in the shape of the original image
         depth = np.zeros(self.mask.shape)
         depth[self.mask > 0.5] = distances
         if self.pelvis_dist != 0:
-            print("Masking Pelvise")
             self._segment_pelvis()
             verts_p, faces_p, normals_p, _ = marching_cubes(
                 self.pelvis.astype(np.uint8),
@@ -409,14 +419,25 @@ class QLayers:
                 level=0.5,
                 step_size=1.0,
             )
+
             mesh_p = trimesh.Trimesh(
                 vertices=verts_p, faces=faces_p, vertex_normals=normals_p
             )
-            (
-                closest_points_p,
-                distances_p,
-                triangle_id_p,
-            ) = mesh_p.nearest.on_surface(points)
+
+            i = 0
+            distances_p = np.zeros(len(points))
+            with tqdm(total=batches,
+                      desc="Pelvis Distance Calculation") as pbar:
+                while i < len(points):
+                    (
+                        closest_points_p,
+                        dist_p,
+                        triangle_id_p,
+                    ) = mesh_p.nearest.on_surface(points[i:i + batch_size])
+
+                    distances_p[i:i + batch_size] = dist_p
+                    i += batch_size
+                    pbar.update()
             depth_p = np.zeros(self.mask.shape)
             depth_p[self.mask > 0.5] = distances_p
             depth[depth_p < self.pelvis_dist] = 0
