@@ -350,6 +350,19 @@ class QLayers:
         pelvis_img = nib.Nifti1Image(self.pelvis.astype(np.int32), self.affine)
         nib.save(pelvis_img, fname)
 
+    def save_surface(self, fname):
+        """
+        Saves the kidney surface as a stl file.
+
+        Parameters
+        ----------
+        fname : str
+            Filename to save the kidney surface to.
+        """
+        if not hasattr(self, "smooth_mesh"):
+            self._calculate_depth()
+        self.smooth_mesh.export(fname)
+
     def _calculate_depth(self):
         """
         Calculates the distance from each voxel to the surface of the kidney.

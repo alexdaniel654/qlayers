@@ -153,11 +153,13 @@ class TestQLayers:
         qlayers.save_depth("test_output/depth.nii.gz")
         qlayers.save_layers("test_output/layers.nii.gz")
         qlayers.save_pelvis("test_output/pelvis.nii.gz")
+        qlayers.save_surface("test_output/surface.stl")
         output_files = os.listdir("test_output")
-        assert len(output_files) == 3
+        assert len(output_files) == 4
         assert "depth.nii.gz" in output_files
         assert "layers.nii.gz" in output_files
         assert "pelvis.nii.gz" in output_files
+        assert "surface.stl" in output_files
 
         for f in os.listdir("test_output"):
             os.remove(os.path.join("test_output", f))
