@@ -67,9 +67,7 @@ class QLayers:
             1 / self.thickness
         )
         self.layers_list = np.unique(self.layers)
-        self.df_long = pd.DataFrame(
-            columns=["depth", "layer", "measurement", "value"]
-        )
+        self.df_long = pd.DataFrame()
         self.maps = []
         self._tissue_data_ls = None
         self._tissue_labels = None
@@ -124,7 +122,10 @@ class QLayers:
             sub_df["layer"] = self.layers[self.mask]
             sub_df["measurement"] = name
             sub_df["value"] = map_data[self.mask]
-            self.df_long = pd.concat([self.df_long, sub_df])
+            if self.df_long.empty:
+                self.df_long = sub_df
+            else:
+                self.df_long = pd.concat([self.df_long, sub_df])
 
         if self.space == "map":
             # Resample layers into space of map
