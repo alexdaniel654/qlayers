@@ -187,9 +187,9 @@ class QLayers:
         self._tissue_img = tissue_img
         self._tissue_labels = tissue_labels
         self._tissue_data_ls = resample_from_to(
-            tissue_img, self.mask_img, order=0, cval=2**16 - 2
+            tissue_img, self.mask_img, order=0, cval=2 ** 16 - 2
         ).get_fdata()
-        self._tissue_data_ls[self._tissue_data_ls == 2**16 - 2] = np.nan
+        self._tissue_data_ls[self._tissue_data_ls == 2 ** 16 - 2] = np.nan
         self._tissue_data_ls[self._tissue_data_ls == 0] = np.nan
 
         if self._tissue_labels is not None:
@@ -227,18 +227,30 @@ class QLayers:
             depth/layer of each voxel.
         """
         if self._tissue_labels is not None:
+            if len(self._tissue_labels) > 1:
+                _tissue_labels_type = type(self._tissue_labels[0])
+            else:
+                _tissue_labels_type = type(self._tissue_labels)
+
             if len(self.df_long) > 0:
                 self.df_long = self.df_long.dropna(subset=["tissue"])
+                self.df_long["tissue"] = self.df_long["tissue"].astype(
+                    _tissue_labels_type
+                )
                 for ind, label in zip(
-                    self.df_long["tissue"].unique(), self._tissue_labels
+                    np.sort(self.df_long["tissue"].unique()),
+                    self._tissue_labels
                 ):
                     self.df_long.loc[
                         self.df_long["tissue"] == ind, "tissue"
                     ] = label
             if self.space == "layers":
                 self.df_wide = self.df_wide.dropna(subset=["tissue"])
+                self.df_wide["tissue"] = self.df_wide["tissue"].astype(
+                    _tissue_labels_type
+                )
                 for ind, label in zip(
-                    self.df_wide["tissue"].unique(),
+                    np.sort(self.df_wide["tissue"].unique()),
                     self._tissue_labels,
                 ):
                     self.df_wide.loc[
