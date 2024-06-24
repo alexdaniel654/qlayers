@@ -77,7 +77,7 @@ class QLayers:
             self.df_wide["depth"] = self.depth[self.mask]
             self.df_wide["layer"] = self.layers[self.mask]
 
-    def add_map(self, map_img, name):
+    def add_map(self, map_img, name, norm=False):
         """
         Add a quantitative map to the object. The either map or
         layers will be resampled to a common space depending on the
@@ -90,6 +90,10 @@ class QLayers:
         name : str
             Name of the quantitative map to be added. This name will be used
             as a column name in the output dataframe.
+        norm: bool, optional
+            Default False
+            If True, the map will be normalized to have a mean of 0 and a
+            standard deviation of 1 before being added to the object.
         """
         self.maps.append(name)
         if map_img.ndim == 2:
@@ -98,9 +102,14 @@ class QLayers:
         if self.space == "layers":
             # Resample map into space of layers. Doing cval as a big and
             # unusual number as cval=np.nan doesn't work
-            map_img = resample_from_to(map_img, self.mask_img, cval=2**16 - 2)
+            map_img = resample_from_to(map_img, self.mask_img,
+                                       cval=2 ** 16 - 2)
             map_data = map_img.get_fdata()
-            map_data[map_data == 2**16 - 2] = np.nan
+            map_data[map_data == 2 ** 16 - 2] = np.nan
+
+            if norm:
+                map_data = self._normalise_data(map_data, self.mask)
+
             self.df_wide[name] = map_data[self.mask]
 
             if self._tissue_img is None:
@@ -141,13 +150,17 @@ class QLayers:
             mask_rs = mask_img_rs.get_fdata() > 0.5
             map_data = map_img.get_fdata()
 
+            if norm:
+                map_data = self._normalise_data(map_data, mask_rs)
+
             if self._tissue_img is None:
                 sub_df = pd.DataFrame(
                     columns=["depth", "layer", "measurement", "value"]
                 )
             else:
                 sub_df = pd.DataFrame(
-                    columns=["depth", "layer", "tissue", "measurement", "value"]
+                    columns=["depth", "layer", "tissue", "measurement",
+                             "value"]
                 )
                 tissue_rs = resample_from_to(
                     self._tissue_img, map_img, order=0
@@ -483,3 +496,22 @@ class QLayers:
         noise_ml = 2.5
         noise_vox = int(noise_ml / (np.prod(self.zoom) / 1000))
         self.pelvis = remove_small_objects(hulls, noise_vox)
+
+    @staticmethod
+    def _normalise_data(data, mask=None):
+        """
+        Normalise data to have a mean of 0 and a standard deviation of 1.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Data to be normalised
+
+        Returns
+        -------
+        numpy.ndarray
+            Normalised data
+        """
+        if mask is None:
+            mask = np.ones(data.shape, dtype=bool)
+        return (data - np.nanmean(data[mask])) / np.nanstd(data[mask])
