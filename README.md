@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Quantitative layer based analysis for renal magnetic resonance imaging.
+<h2 align="center"><img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/master/images/3DQLayers_Logo_Logo.png"
+height="180"></h2>
+<p align="center"><strong>Quantitative layer based analysis for renal magnetic resonance imaging.</strong></p>
 
 ## Installation
 
