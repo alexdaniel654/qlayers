@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
-import pathlib
+import sphinx_rtd_theme
 import sys
 
 from datetime import datetime
@@ -29,7 +29,10 @@ extensions = ['sphinx.ext.napoleon',
               'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.todo',
-              'myst_parser']
+              'myst_parser',
+              'nbsphinx',
+              # 'sphinx_gallery.load_style',
+              'nbsphinx_link']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -41,3 +44,23 @@ napoleon_include_init_with_doc = True
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_context = {
+    "sidebar_external_links_caption": "Links",
+    "sidebar_external_links"        : [
+        (
+            '<i class="fa fa-github fa-fw"></i> Source Code',
+            "https://github.com/alexdaniel654/qlayers",
+        ),
+        (
+            '<i class="fa fa-bug fa-fw"></i> Issue Tracker',
+            "https://github.com/alexdaniel654/qlayers/issues",
+        ),
+        (
+            '<i class="fa fa-file-text fa-fw"></i> Citation',
+            "https://doi.org/10.5281/zenodo.593610",
+        ),
+    ],
+}
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_style = os.path.join("css", "custom.css")
+html_favicon = os.path.join("_static", "favicon.ico")

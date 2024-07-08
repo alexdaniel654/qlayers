@@ -1,8 +1,14 @@
-3DQlayers
-=========
+Layers Objects
+============
 
-.. toctree::
-   :maxdepth: 4
+.. automodule:: qlayers.quant_layers
+    :members:
 
-   qlayers.quant_layers
+Derived Measures
+================
+.. automodule:: qlayers.regression
+    :members:
+
+.. automodule:: qlayers.thickness
+    :members:
 
