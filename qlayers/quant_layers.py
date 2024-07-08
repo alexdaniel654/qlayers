@@ -1,6 +1,7 @@
 import nibabel as nib
 import numpy as np
 import pandas as pd
+import pickle
 import trimesh
 from nibabel.processing import resample_from_to
 from skimage.measure import marching_cubes
@@ -389,6 +390,22 @@ class QLayers:
             self._calculate_depth()
         self.smooth_mesh.export(fname)
 
+    def to_pickle(self, fname):
+        """
+        Saves the QLayers object as a pickle file.
+
+        Warning: The ability to import pickle files between Python versions
+        is not guaranteed, as such this is not recommended for long term
+        storage of QLayers objects!
+
+        Parameters
+        ----------
+        fname : str
+            Filename to save the QLayers to.
+        """
+        with open(fname, "wb") as f:
+            pickle.dump(self, f)
+
     def _calculate_depth(self):
         """
         Calculates the distance from each voxel to the surface of the kidney.
@@ -515,3 +532,22 @@ class QLayers:
         if mask is None:
             mask = np.ones(data.shape, dtype=bool)
         return (data - np.nanmean(data[mask])) / np.nanstd(data[mask])
+
+
+def load_pickle(fname):
+    """
+    Load a pickle file containing a QLayers object.
+
+    Parameters
+    ----------
+    fname : str
+        Filename of the pickle file to load.
+
+    Returns
+    -------
+    QLayers
+        The QLayers object stored in the pickle file.
+    """
+    with open(fname, "rb") as f:
+        qlayers = pickle.load(f)
+    return qlayers
