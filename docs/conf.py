@@ -31,7 +31,6 @@ extensions = ['sphinx.ext.napoleon',
               'sphinx.ext.todo',
               'myst_parser',
               'nbsphinx',
-              # 'sphinx_gallery.load_style',
               'nbsphinx_link']
 
 templates_path = ['_templates']

@@ -6,7 +6,7 @@ import pytest
 import shutil
 
 from hashlib import sha1
-from qlayers import QLayers
+from qlayers import QLayers, load_pickle
 
 
 class TestQLayers:
@@ -106,7 +106,7 @@ class TestQLayers:
 
     def test_fill_ml(self):
         # Fill the cysts
-        qlayers = QLayers(self.basic_img_with_cyst, fill_ml=0.065)
+        qlayers = QLayers(self.basic_img_with_cyst, fill_ml=1)
         depth = qlayers.get_depth()
         npt.assert_almost_equal(depth.max(), 8, decimal=2)
         npt.assert_almost_equal(depth.min(), 0, decimal=2)
@@ -114,7 +114,7 @@ class TestQLayers:
         assert np.sum(depth > 0) == 4032
 
         # Don't fill the cysts (treat them as their own surface)
-        qlayers = QLayers(self.basic_img_with_cyst, fill_ml=0.063)
+        qlayers = QLayers(self.basic_img_with_cyst, fill_ml=0.001)
         depth = qlayers.get_depth()
         npt.assert_almost_equal(depth.max(), 7.222, decimal=2)
         npt.assert_almost_equal(depth.min(), 0, decimal=2)
@@ -154,12 +154,30 @@ class TestQLayers:
         qlayers.save_layers("test_output/layers.nii.gz")
         qlayers.save_pelvis("test_output/pelvis.nii.gz")
         qlayers.save_surface("test_output/surface.stl")
+        qlayers.to_pickle("test_output/qlayers.pkl")
         output_files = os.listdir("test_output")
-        assert len(output_files) == 4
+        assert len(output_files) == 5
         assert "depth.nii.gz" in output_files
         assert "layers.nii.gz" in output_files
         assert "pelvis.nii.gz" in output_files
         assert "surface.stl" in output_files
+        assert "qlayers.pkl" in output_files
+
+        for f in os.listdir("test_output"):
+            os.remove(os.path.join("test_output", f))
+        shutil.rmtree("test_output")
+
+    def test_load_pickle(self):
+        qlayers = QLayers(self.kidneys_with_pelvis_img)
+        if os.path.exists("test_output"):
+            shutil.rmtree("test_output")
+        os.makedirs("test_output", exist_ok=True)
+
+        qlayers.to_pickle("test_output/qlayers.pkl")
+        qlayers_loaded = load_pickle("test_output/qlayers.pkl")
+        assert qlayers_loaded.space == qlayers.space
+        assert qlayers_loaded.layers.shape == qlayers.layers.shape
+        assert qlayers_loaded.depth.shape == qlayers.depth.shape
 
         for f in os.listdir("test_output"):
             os.remove(os.path.join("test_output", f))
@@ -177,6 +195,9 @@ class TestQLayers:
         qlayers.add_map(self.basic_map_img, "t2")
         assert len(qlayers.maps) == 2
         assert qlayers.maps[1] == "t2"
+        qlayers.add_map(self.basic_map_img, "swi", norm=True)
+        assert len(qlayers.maps) == 3
+        assert qlayers.maps[2] == "swi"
 
     def test_add_map_map_space(self):
         qlayers = QLayers(self.basic_img, space="map")
@@ -186,6 +207,9 @@ class TestQLayers:
         qlayers.add_map(self.basic_map_img, "t2")
         assert len(qlayers.maps) == 2
         assert qlayers.maps[1] == "t2"
+        qlayers.add_map(self.basic_map_img, "swi", norm=True)
+        assert len(qlayers.maps) == 3
+        assert qlayers.maps[2] == "swi"
 
     def test_add_map_2d(self):
         # Layers space
@@ -228,7 +252,8 @@ class TestQLayers:
         qlayers.add_map(self.basic_map_img, "t2")
         df = qlayers.get_df(format="long")
         assert df.shape == (8192, 4)
-        assert df.columns.tolist() == ["depth", "layer", "measurement", "value"]
+        assert df.columns.tolist() == ["depth", "layer", "measurement",
+                                       "value"]
         assert df["measurement"].unique().tolist() == ["t1", "t2"]
         npt.assert_array_almost_equal(
             df.mean(numeric_only=True).values,
@@ -410,3 +435,9 @@ class TestQLayers:
         with pytest.raises(ValueError):
             qlayers = QLayers(self.basic_img, space="layers")
             qlayers.add_tissue(self.basic_tissue_img, tissue_labels="cortex")
+
+    def test_norm_map(self):
+        qlayers = QLayers(self.basic_img, space="map")
+        map_norm = qlayers._normalise_data(self.basic_map_data)
+        npt.assert_almost_equal(map_norm.mean(), 0, decimal=5)
+        npt.assert_almost_equal(map_norm.std(), 1, decimal=5)
