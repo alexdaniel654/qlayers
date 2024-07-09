@@ -64,3 +64,4 @@ html_context = {
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_style = os.path.join("css", "custom.css")
 html_favicon = os.path.join("_static", "favicon.ico")
+html_logo = os.path.join("_static", "logo.png")

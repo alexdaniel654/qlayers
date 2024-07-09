@@ -17,11 +17,4 @@ Welcome to 3DQLayers's documentation!
    :caption: Reference:
 
    modules
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   references

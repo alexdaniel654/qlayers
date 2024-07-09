@@ -1,11 +1,9 @@
-Layers Objects
-============
+API Reference
+=============
 
 .. automodule:: qlayers.quant_layers
     :members:
 
-Derived Measures
-================
 .. automodule:: qlayers.regression
     :members:
 
