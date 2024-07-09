@@ -18,3 +18,4 @@ Welcome to 3DQLayers's documentation!
 
    modules
    references
+   changelog_link.md
