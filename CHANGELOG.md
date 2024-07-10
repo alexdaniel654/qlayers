@@ -1,32 +1,10 @@
-## [0.0.1-rc.3] - 2024-07-10
-
-### Added
-
-* DOIs are now minted on release #1 #3
-
-### Changed
-
-*
+## [0.0.2] - 2024-07-10
 
 ### Fixed
 
-* Version numbers should now match across the project
+* Most new release related issues #1 #2 #3
 
-## [0.0.1-rc.2] - 2024-07-10
-
-### Added
-
-*
-
-### Changed
-
-* Release action now points to CHANGELOG with correct extension
-
-### Fixed
-
-*
-
-## [0.0.1-rc.1] - 2024-07-10
+## [0.0.1] - 2024-07-10
 
 ### Added
 
