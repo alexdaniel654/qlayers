@@ -1,3 +1,17 @@
+## [0.0.1-rc.3] - 2024-07-10
+
+### Added
+
+* DOIs are now minted on release #1 #3
+
+### Changed
+
+*
+
+### Fixed
+
+* Version numbers should now match across the project
+
 ## [0.0.1-rc.2] - 2024-07-10
 
 ### Added

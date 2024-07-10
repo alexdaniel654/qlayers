@@ -3,7 +3,9 @@
 [![Python CI](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml/badge.svg?branch=main)](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml)
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12707173.svg)](https://doi.org/10.5281/zenodo.12707173)
 
 <h2 align="center"><img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/3DQLayers_Logo_Logo.png" height="100"></h2>
 

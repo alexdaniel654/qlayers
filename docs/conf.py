@@ -19,7 +19,7 @@ readme_path = '../README.md'
 project = '3DQLayers'
 copyright = f'{datetime.now().year}, Alexander J Daniel'
 author = 'Alexander J Daniel'
-release = 'v0.0.1'
+release = 'v0.0.1-rc.3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -56,7 +56,7 @@ html_context = {
         ),
         (
             '<i class="fa fa-file-text fa-fw"></i> Citation',
-            "https://doi.org/10.5281/zenodo.593610",
+            "https://doi.org/10.5281/zenodo.12707172",
         ),
     ],
 }
