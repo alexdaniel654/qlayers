@@ -46,7 +46,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          bodyFile: "CHANGELOG.txt"
+          bodyFile: "CHANGELOG.md"
 
   publish_to_testpypi:
     name: Publish to Test PyPI
