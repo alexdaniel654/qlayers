@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-<h2 align="center"><img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/3DQLayers_Logo_Logo.png?token=GHSAT0AAAAAACHECG6NOH43EG3NRQFOQ4K4ZUMC6EA" height="100"></h2>
+<h2 align="center"><img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/3DQLayers_Logo_Logo.png" height="100"></h2>
 
 <p align="center"><strong>Quantitative layer based analysis for renal magnetic resonance imaging.</strong></p>
 
@@ -45,7 +45,7 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
 )
 ```
 
-<img src="examples%2Fexample_t2star_profile.png" height="360">
+<img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/example_t2star_profile.png" height="360">
 
 ## Theory
 
@@ -53,16 +53,16 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
 
 The premise behind `qlayers` was first proposed by [Pruijm et al](https://doi.org/10.1007/s10334-019-00808-5) and is based
 on the idea to segment the kidney into layers based on each voxels distance from the surface of the kidney. The average of
-a quantitative parameter can be calculated for each layer producing profiles of, for example, $T_2^*$ with depth. The outer
-and inner layers are analogous to the cortex and medulla respectively while the gradient of the profile is representative of
-the cortico-medullary difference. `qlayers` extends this idea by allowing the user to define layers based on a 3D mask and
-apply the layer to any quantitative parameter.
+a quantitative parameter can be calculated for each layer producing profiles of, for example, T<sub>2</sub><sup>*</sup> with
+depth. The outer and inner layers are analogous to the cortex and medulla respectively while the gradient of the profile is
+representative of the cortico-medullary difference. `qlayers` extends this idea by allowing the user to define layers based on
+a 3D mask and apply the layer to any quantitative parameter.
 
 ### Generating Layers
 
 Layers are generated via the process outlined in the figure below.
 
-<img src="examples%2Fflowchart.png" width="50%">
+<img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/flowchart.png" width="50%">
 
 a i. Shows the mask thats input to the `QLayers` class. This mask then has any holes smaller than `fill_ml` filled as these are
 most likely cysts
