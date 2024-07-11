@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
+[![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12707173.svg)](https://doi.org/10.5281/zenodo.12707173)
 
