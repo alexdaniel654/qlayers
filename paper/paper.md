@@ -25,7 +25,8 @@ bibliography: paper.bib
 ---
 
 # Summary
-
+Here are some words and now a reference [@piskunowicz_new_2015; @milani_reduction_2017; @li_renal_2020]. 
+ 
 # Statement of need
 
 # Figures
