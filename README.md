@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/downloads.svg)](https://anaconda.org/conda-forge/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12707173.svg)](https://doi.org/10.5281/zenodo.12707173)
 
@@ -18,6 +20,11 @@ The easiest way to install `qlayers`is via `pip`:
 
 ```bash
 pip install qlayers
+```
+or if you're a `conda` user:
+
+```bash
+conda install qlayers -c conda-forge
 ```
 
 Alternatively, you can install `qlayers`from source in pips editable mode:
@@ -48,8 +55,9 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
     xlabel="Depth (mm)", ylabel="$T_2^*$ (ms)"
 )
 ```
-
+<p align="center">
 <img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/example_t2star_profile.png" height="360">
+</p>
 
 ## Theory
 
@@ -65,8 +73,9 @@ a 3D mask and apply the layer to any quantitative parameter.
 ### Generating Layers
 
 Layers are generated via the process outlined in the figure below.
-
+<p align="center">
 <img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/flowchart.png" width="50%">
+</p>
 
 a i. Shows the mask thats input to the `QLayers` class. This mask then has any holes smaller than `fill_ml` filled as these are
 most likely cysts
