@@ -21,6 +21,7 @@ The easiest way to install `qlayers`is via `pip`:
 ```bash
 pip install qlayers
 ```
+
 or if you're a `conda` user:
 
 ```bash
@@ -37,8 +38,8 @@ pip install -e .
 
 ## Quick Start
 
-For a more thorough example of how to use `qlayers` see the example notebook,
-however if you want to get started, the snippet of code below should get you going.
+For a more thorough example of how to use `qlayers` see the tutorials section of this reposetry/documentation, however if
+you want to get started, the snippet of code below should get you going.
 
 ```python
 import nibabel as nib
@@ -55,6 +56,7 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
     xlabel="Depth (mm)", ylabel="$T_2^*$ (ms)"
 )
 ```
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/example_t2star_profile.png" height="360">
 </p>
@@ -109,3 +111,15 @@ voxels are shown in the table below.
 | 6.66  | 7     | 49.2 | 20.3 |
 | 19.8  | 20    | 42.8 | 23.3 |
 | 12.1  | 13    | 39.4 | 25.4 |
+
+## Citing 3DQLayers
+
+If you have used 3DQLayers in your research, please cite the following conference abstract:
+
+[Daniel AJ, Francis ST. Volumetric Layer Based Analysis for Quantitative Renal MRI. In: Proc. Intl. Soc. Mag. Reson. Med. 33. Singapore; 2024:2748.](https://www.researchgate.net/publication/380534128_Volumetric_Layer_Based_Analysis_for_Quantitative_Renal_MRI)
+
+Alternatively, if you want to cite a specific version of this software, each release has an individual DOI on Zenodo, the
+DOI for the latest release can be [found here](https://zenodo.org/doi/10.5281/zenodo.12707172).
+
+## Contributing
+Feel free to open a pull request if you have a feature you want to develop or drop me [an email](mailto:alexander.daniel@nottingham.ac.uk?subject=3DQLayers) to discuss things further.
