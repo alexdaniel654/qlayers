@@ -31,19 +31,33 @@ These limitations are addressed by 3DQLayers, a Python package to automatically 
 
 # Statement of need
 ## Background
-The kidneys are a pair of structurally and functionally complex organs in the lower abdomen that participate in the control of bodily fluids by regulating the balance of electrolytes, excreting waste products of metabolism and excess water from blood to urine [@lote_principles_2012]. The each kidney is separated into two tissue types; cortical tissue located towards the outside of each organ, and medullary tissue arranged in small pyramids towards the centre of the organ [@hall_guyton_2015], \autoref{fig:renal_structure}. MRI is the ideal medical imaging modality to study the kidneys due to its non-ionising, non-invasive and quantitative nature [@francis_magnetic_2023; @selby_assessment_2024]. Quantitative MRI is the process of taking measurements where the value of each voxel has numerical significance, in physical units, based on the tissues underlying properties rather than simply representing signal intensity in arbitrary units. Example quantitative measurements include how readily water can diffuse through the tissue and the rate at which blood perfuses into the tissue. To help interpret quantitative images, regions of interest (ROI) are defined and statistical measures taken of the voxels within each region. 
+The kidneys are a pair of structurally and functionally complex organs in the lower abdomen that participate in the control of bodily fluids by regulating the balance of electrolytes, excreting waste products of metabolism and excess water from blood to urine [@lote_principles_2012]. The each kidney is separated into two tissue types; cortical tissue located towards the outside of each organ, and medullary tissue arranged in small pyramids towards the centre of the organ [@hall_guyton_2015], as shown in \autoref{fig:renal_structure}. MRI is the ideal medical imaging modality to study the kidneys due to its non-ionising, non-invasive and quantitative nature [@francis_magnetic_2023; @selby_assessment_2024]. Quantitative MRI is the process of taking measurements where the value of each voxel has numerical significance, in physical units, based on the tissues underlying properties rather than simply representing signal intensity in arbitrary units. Example quantitative measurements include how readily water can diffuse through the tissue and the rate at which blood perfuses into the tissue. To help interpret quantitative images, regions of interest (ROI) are defined and statistical measures taken of the voxels within each region. 
 
 Segmenting ROI for the renal cortex and medulla manually is time consuming, difficult and prone to intra- and inter-reader variation thus decreasing the repeatability of measurements. Pruijm _et al_ proposed an alternative to tissue ROI based analysis in the Twelve Layer Concentric Object (TLCO) method [@piskunowicz_new_2015; @milani_reduction_2017; @li_renal_2020] where users delineate the inner and outer boundaries of the kidney to generate twelve equidistant layers between the renal pelvis and the surface of the kidney. The outer layers are analogous to the cortex and inner layers are analogous the medulla.
 
 TLCO requires the MR image to be a single slice cutting through the kidneys on their longest axis (coronal-oblique) however, this is not always desirable [@bane_consensus-based_2020]. Often researchers prefer to acquire multi-slice images to increase the number of voxels in the image and gain a better understanding of the heterogeneity of the kidney. Additionally flexibility in the orientation images are acquired at is highly desirable. These limitations of TLCO were the motivation for the development of 3DQLayers, a volumetric, quantitative-depth based analysis method for renal MRI data.
 
 ## Methods
+An overview of the process used by 3DQLayers to generate renal layers is shown in \autoref{fig:flowchart}.
+
+### Pre-processing
+3DQLayers generates layers from a whole kidney ROI, this can be automatically generated from a structural image [@daniel_automated_2021; @daniel_renal_2024], \autoref{fig:flowchart}ai. Any holes in the mask smaller than a specified number of millilitres are filled as these are assumed to be cysts and the surface of a cyst is not representative of the surface of the kidney, \autoref{fig:flowchart}aii.
+
+### Generating Layers
+The kidney ROI is converted from a voxel-based representation to a surface-mesh-based representation using the marching cubes algorithm [@lorensen_marching_1987] \autoref{fig:flowchart}bi. Since renal MR images tend to be acquired with anisotropic voxel dimensions, mutable diffusion Laplacian smoothing [@barroqueiro_bridging_2021] is applied to the mesh so it is more similar to the true surface of the kidneys \autoref{fig:flowchart}bii. Next, the distance from the centre of each voxel in the kidney ROI to the mesh surface is calculated, producing a depth map [@dawson-haggerty_trimesh_2023], \autoref{fig:flowchart}biii. As the tissue adjacent to the renal pelvis is not representative of medulla, this is automatically excluded from the resulting depth map. First, the pelvis is automatically segmented, \autoref{fig:flowchart}ci, and the distance from each voxel in the kidney to the pelvis calculated as above, \autoref{fig:flowchart}cii. Voxels closer than a specified threshold, typically 10 mm, are excluded from the depth map, \autoref{fig:flowchart}ciii. Finally, a layer image is generated by quantising the depth map to a desired layer thickness, typically 1mm, \autoref{fig:flowchart}d.
+
+### Applying Layers to Quantitative Data
+Resampled using [@brett_nipy/nibabel_2019]
+
+### Derived Measures
 
 ## Example Usage
 
 
 # Figures
-![a. A schematic of the kidneys showing the renal cortex and medullary pyramids. b. An anatomical MR Image of the abdomen showing the kidneys with the renal cortex appearing as a light band towards the outside of the kidneys and medullary pyramids as darker patches towards the centre of the kidneys. \label{fig:renal_structure}](kidney_overview.png){ width=90% }
+![a) A schematic of the kidneys showing the renal cortex and medullary pyramids. b) An anatomical MR Image of the abdomen showing the kidneys with the renal cortex appearing as a light band towards the outside of the kidneys and medullary pyramids as darker patches towards the centre of the kidneys. \label{fig:renal_structure}](kidney_overview.png){ width=90% }
+
+![The mask from the T2-weighted FSE scan (a i) has any cysts filled (a ii) and is converted into a smooth mesh representing the renal surface (b i and ii). The distance (in mm) from each voxel to the surface of the mesh is calculated (b iii). The renal pelvis is segmented (c i) and any tissue within 10 mm (c ii) of the pelvis is excluded from the depth map (c iii). The tissue is then grouped into layers of a desired thickness, here shown as 5 mm layers for illustrative purposes (d). \label{fig:flowchart}](flowchart.png)
 
 # Acknowledgements
 
