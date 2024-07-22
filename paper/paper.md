@@ -47,17 +47,21 @@ The layer image and quantitative images are resampled to the same resolution usi
 An object oriented interface makes it easy for users to generate layers and use them to analyse quantitative images. [Documentation](https://qlayers.readthedocs.io/) is provided to guide users through instillation via `PyPI`, `conda` or from [source code on GitHub](https://github.com/alexdaniel654/qlayers) and includes tutorials and an API reference. An automated test suite with high coverage gives users confidence in the stability of `3DQLayers` and that there will be no unexpected changes to results unless highlighted in the change-log.
 
 ## Usage Examples
-An estimated glomerular filtration rate (eGFR) above 90 ml/min/1.73m^2^ is considered healthy. \autoref{fig:egfr_gradients} shows `3DQLayers` being used to measure different gradients of R~2~^*^ in volunteers with normal an impaired renal function. This replicates results shown using TLCO however `3DQLayers` controls for kidneys size and as such the gradients are measured in quantitative units of Hz/mm rather than Hz/layer as in TLCO.
+An estimated glomerular filtration rate (eGFR) above 90 ml/min/1.73m^2^ is considered healthy. \autoref{fig:egfr_gradients} shows `3DQLayers` being used to measure different gradients of R~2~^\*^ in volunteers with normal an impaired renal function. This replicates results shown using TLCO however `3DQLayers` controls for kidneys size and as such the gradients are measured in quantitative units of Hz/mm rather than Hz/layer as in TLCO.
 
-`3DQLayers` can also be used to analyse kidneys outside the body. \autoref{fig:exvivo_profiles} shows example quantitative maps acquired from a kidney removed for transplant and associated layer profiles. \autoref{fig:roi_layers_corr} compares results of ROI-based analysis and layer-based analysis in fifteen transplant kidneys. A significant correlation between outer layers and the cortex, and inner layers and the medulla was shown across all quantitative mapping techniques and a significant correlation between cortico-medullary ratio and layer gradient was shown for T~1~, T~2~, T~2~^*^ and MTR mapping.
+`3DQLayers` can also be used to analyse kidneys outside the body. \autoref{fig:exvivo_profiles} shows example quantitative maps acquired from a kidney removed for transplant and associated layer profiles. \autoref{fig:roi_layers_corr} compares results of ROI-based analysis and layer-based analysis in fifteen transplant kidneys. A significant correlation between outer layers and the cortex, and inner layers and the medulla was shown across all quantitative mapping techniques and a significant correlation between cortico-medullary ratio and layer gradient was shown for T~1~, T~2~, T~2~ ^`*`^ and MTR mapping.
 
 # Figures
 ![a) A schematic of the kidneys showing the renal cortex and medullary pyramids. b) An anatomical MR Image of the abdomen showing the kidneys with the renal cortex appearing as a light band towards the outside of the kidneys and medullary pyramids as darker patches towards the centre of the kidneys. \label{fig:renal_structure}](kidney_overview.png){ width=90% }
 
 ![The mask from the T2-weighted structural scan (a i) has any cysts filled (a ii) and is converted into a smooth mesh representing the renal surface (b i and ii). The distance (in mm) from each voxel to the surface of the mesh is calculated (b iii). The renal pelvis is segmented (c i) and any tissue within 10 mm (c ii) of the pelvis is excluded from the depth map (c iii). The tissue is then grouped into layers of a desired thickness, here shown as 5 mm layers for illustrative purposes (d). \label{fig:flowchart}](flowchart.png)
+
 ![R2* maps and layer profiles measured using `3DQLayers` for a subject with healthy renal function and a subject with impaired renal function. Uncertainty shading shows the 95% confidence interval of each layer. \label{fig:egfr_gradients}](gradients.png)
+
 ![Example quantitative maps and associated depth profiles when `3DQLayers` is applied to transplant kidneys. Uncertainty shading shows the 95% confidence interval of each layer. \label{fig:exvivo_profiles}](example_profiles.png)
+
 ![Agreement between tissue label-based analysis methods and layer-based analysis methods and the Pearsons correlation coefficient. p-value of * < 0.05, ** < 0.01 and *** < 0.001. \label{fig:roi_layers_corr}](roi_layers_corr.png)
+
 # Acknowledgements
 
 # References
