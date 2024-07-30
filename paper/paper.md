@@ -65,6 +65,7 @@ An estimated glomerular filtration rate (eGFR) above 90 ml/min/1.73m^2^ is consi
 ![Agreement between tissue label-based analysis methods and layer-based analysis methods and the Pearsons correlation coefficient ($ \rho $). * represents a _p_-value between 0.05 and 0.1, ** between 0.01 and  0.001, and *** < 0.001. \label{fig:roi_layers_corr}](roi_layers_corr.png)
 
 ![Exploring the distribution of tissue types through the kidney to measure cortical thickness. \label{fig:cortical_thickness}](cortical_thickness.png){ width=50% }
+
 # Acknowledgements
 
 # References
