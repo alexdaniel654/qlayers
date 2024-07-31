@@ -58,11 +58,11 @@ An estimated glomerular filtration rate (eGFR) above 90 ml/min/1.73m^2^ is consi
 
 ![The mask from the T2-weighted structural scan (a i) has any cysts filled (a ii) and is converted into a smooth mesh representing the renal surface (b i and ii). The distance (in mm) from each voxel to the surface of the mesh is calculated (b iii). The renal pelvis is segmented (c i) and any tissue within 10 mm (c ii) of the pelvis is excluded from the depth map (c iii). The tissue is then grouped into layers of a desired thickness, here shown as 5 mm layers for illustrative purposes (d). \label{fig:flowchart}](flowchart.png)
 
-![Layers, R~2~ ^\*^ maps and layer profiles measured using `3DQLayers` for a subject with healthy renal function and a subject with impaired renal function. Shading around lines shows the 95% confidence interval. \label{fig:egfr_gradients}](gradients.png)
+![Layers, R~2~ ^\*^ maps and layer profiles measured using `3DQLayers` for a subject with healthy renal function and a subject with impaired renal function. Shading around profiles shows the 95% confidence interval within each layer. \label{fig:egfr_gradients}](gradients.png)
 
-![Example quantitative maps and associated depth profiles when `3DQLayers` is applied to transplant kidneys. Uncertainty shading shows the 95% confidence interval of each layer. \label{fig:exvivo_profiles}](example_profiles.png)
+![Example quantitative maps and associated layer profiles when `3DQLayers` is applied to transplant kidneys. Uncertainty shading shows the 95% confidence interval of each layer. \label{fig:exvivo_profiles}](example_profiles.png)
 
-![Agreement between tissue label-based analysis methods and layer-based analysis methods and the Pearsons correlation coefficient ($ \rho $). * represents a _p_-value between 0.05 and 0.1, ** between 0.01 and  0.001, and *** < 0.001. \label{fig:roi_layers_corr}](roi_layers_corr.png)
+![Agreement between tissue label-based analysis methods and layer-based analysis methods and the Pearsons correlation coefficient ($\rho$). * represents a _p_-value between 0.05 and 0.1, ** between 0.01 and  0.001, and *** < 0.001. \label{fig:roi_layers_corr}](roi_layers_corr.png)
 
 ![Exploring the distribution of tissue types through the kidney to measure cortical thickness. \label{fig:cortical_thickness}](cortical_thickness.png){ width=50% }
 
