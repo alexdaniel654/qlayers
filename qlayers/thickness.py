@@ -1,5 +1,6 @@
 import numpy as np
 
+from scipy import stats
 from scipy.optimize import curve_fit, fsolve
 
 
@@ -46,7 +47,7 @@ def gaussian(x, a, b, c):
     numpy.ndarray
         The Gaussian function applied to x.
     """
-    return a * np.exp(-((x - b) ** 2) / (2 * c**2))
+    return a * np.exp(-((x - b) ** 2) / (2 * c ** 2))
 
 
 def estimate_logistic_params(x, y):
@@ -62,16 +63,19 @@ def estimate_logistic_params(x, y):
 
     Returns
     -------
-    numpy.ndarray
+    params : numpy.ndarray
         The estimated parameters [L, x0, k].
+    err : numpy.ndarray
+        The uncertainty in the estimated parameters.
     """
     # Provide some initial guess values for L, x0, k
     initial_guess = [max(y), np.median(x), -1]
 
     # Use curve_fit to estimate the logistic function parameters
-    params, params_covariance = curve_fit(logistic, x, y, p0=initial_guess)
-
-    return params
+    params, params_covariance = curve_fit(logistic, x, y, p0=initial_guess,
+                                          bounds=([0, 0, -np.inf], [np.inf, 500, 0]))
+    err = np.sqrt(np.diag(params_covariance))
+    return params, err
 
 
 def estimate_gaussian_params(x, y):
@@ -87,16 +91,19 @@ def estimate_gaussian_params(x, y):
 
     Returns
     -------
-    numpy.ndarray
+    params : numpy.ndarray
         The estimated parameters [a, b, c].
+    err : numpy.ndarray
+        The uncertainty in the estimated parameters.
     """
     # Provide some initial guess values for a, b, c
     initial_guess = [max(y), np.median(x), np.std(x)]
 
     # Use curve_fit to estimate the Gaussian function parameters
-    params, params_covariance = curve_fit(gaussian, x, y, p0=initial_guess)
-
-    return params
+    params, params_covariance = curve_fit(gaussian, x, y, p0=initial_guess,
+                                          bounds=([0, 0, 0], [np.inf, 500, np.inf]))
+    err = np.sqrt(np.diag(params_covariance))
+    return params, err
 
 
 def equation_system(variable, L, x0, k, a, b, c):
@@ -130,7 +137,7 @@ def equation_system(variable, L, x0, k, a, b, c):
     return eq
 
 
-def cortical_thickness(qlayers):
+def cortical_thickness(qlayers, est_error=False):
     """
     Computes the cortical thickness of the kidneys.
 
@@ -138,11 +145,19 @@ def cortical_thickness(qlayers):
     ----------
     qlayers : object
         The QLayers object.
+    est_error : bool, optional
+        Default False
+        If True, estimate the error in the cortical thickness, this is done using a stochastic approach. Lots of samples
+        are drawn from the estimated parameters and the cortical thickness is calculated for each sample.
+        The mean and standard deviation of the cortical thickness is returned. Estimating errors is therefore slow and
+        off by default.
 
     Returns
     -------
-    float
+    thickness : float
         The cortical depth.
+    thickness_err : float
+        The uncertainty in the cortical depth.
     """
     if qlayers.space != "layers":
         raise ValueError(
@@ -158,7 +173,7 @@ def cortical_thickness(qlayers):
             "Cortical thickness can only be computed if tissue "
             "labels have been added to the QLayers object"
         )
-    if not list(map(str.lower, df["tissue"].unique())) == ["cortex", "medulla"]:
+    if not sorted(list(map(str.lower, df["tissue"].unique()))) == ["cortex", "medulla"]:
         raise ValueError(
             "Cortical thickness can only be computed if tissue "
             'labels are "cortex" and "medulla"'
@@ -177,8 +192,8 @@ def cortical_thickness(qlayers):
     # Fit a logistic function to the cortex data and a Gaussian function to the
     # medulla data
     x = (bins + bin_width / 2)[:-1]
-    params_cortex = estimate_logistic_params(x, density_cortex)
-    params_medulla = estimate_gaussian_params(x, density_medulla)
+    params_cortex, err_cortex = estimate_logistic_params(x, density_cortex)
+    params_medulla, err_medulla = estimate_gaussian_params(x, density_medulla)
 
     # Estimate the intersection of the two curves, this is the point at
     # which more voxels are medulla than cortex and can be taken as the
@@ -186,4 +201,23 @@ def cortical_thickness(qlayers):
     cortical_depth = fsolve(
         equation_system, [5.0], args=(*params_cortex, *params_medulla)
     )
-    return cortical_depth[0]
+    if est_error:
+        n_samp = 1000
+        cortex_samples = np.random.normal(params_cortex, err_cortex, (n_samp, len(params_cortex)))
+        medulla_samples = np.random.normal(params_medulla, err_medulla, (n_samp, len(params_medulla)))
+        cortical_depth_samples = np.zeros(n_samp)
+        for i in range(n_samp):
+            roots = fsolve(equation_system, np.linspace(0, df['depth'].max(), 10),
+                           args=(*cortex_samples[i], *medulla_samples[i])
+                           )
+            roots = roots[0 < roots]
+            roots = roots[roots < 100]
+            if len(roots) > 0:
+                cortical_depth_samples[i] = stats.mode(roots, keepdims=False)[0]
+            else:
+                cortical_depth_samples[i] = np.nan
+        thickness_err = np.nanstd(cortical_depth_samples)
+        thickness_mean = np.nanmean(cortical_depth_samples)
+        return thickness_mean, thickness_err
+    else:
+        return cortical_depth[0]
