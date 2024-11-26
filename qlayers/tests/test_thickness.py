@@ -89,7 +89,7 @@ class TestCorticalThickness:
         with pytest.raises(ValueError):
             cortical_thickness(MockQLayers())
 
-    def test_cortical_thickness_returns_expected_value(self):
+    def test_cortical_thickness_returns_expected_value_no_error(self):
         class MockQLayers:
             def __init__(self):
                 self.space = "layers"
@@ -122,4 +122,42 @@ class TestCorticalThickness:
                 )
                 return df_wide
 
-        assert np.isclose(cortical_thickness(MockQLayers()), 6.84513)
+        thickness = cortical_thickness(MockQLayers(), est_error=False)
+        assert np.isclose(thickness, 6.84513)
+
+    def test_cortical_thickness_returns_expected_value_with_error(self):
+        class MockQLayers:
+            def __init__(self):
+                self.space = "layers"
+
+            def get_df(self, _):
+                # Range of depths
+                x = np.linspace(0, 20, 50)
+
+                # Distributions to draw from
+                cortex_dist = logistic(x, 500, 10, -0.4)
+                medulla_dist = gaussian(x, 300, 10, 4)
+
+                # Number of samples from each tissue type
+                n = 100000
+
+                # Draw samples
+                cortex_depths = np.random.choice(
+                    x, size=n, p=cortex_dist / cortex_dist.sum()
+                )
+                medulla_depths = np.random.choice(
+                    x, size=n, p=medulla_dist / medulla_dist.sum()
+                )
+                df_wide = pd.DataFrame(
+                    {
+                        "depth": np.concatenate(
+                            (cortex_depths, medulla_depths)
+                        ),
+                        "tissue": np.repeat(["Cortex", "Medulla"], n),
+                    }
+                )
+                return df_wide
+
+        thickness, thickness_err = cortical_thickness(MockQLayers(), est_error=True)
+        assert np.isclose(thickness, 8.98140)
+        assert np.isclose(thickness_err, 5.28871)
