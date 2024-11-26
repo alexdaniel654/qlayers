@@ -28,17 +28,17 @@ class TestGaussian:
 class TestEstimateLogisticParams:
     def test_estimate_params_for_logistic_function(self):
         x = np.array([0, 1, 2, 3, 4, 5])
-        y = logistic(x, 1, 2, 1)
-        params = estimate_logistic_params(x, y)
-        assert np.allclose(params, [1, 2, 1])
+        y = logistic(x, 1000, 5, -1)
+        params, err = estimate_logistic_params(x, y)
+        assert np.allclose(params, [1000, 5, -1])
 
 
 class TestEstimateGaussianParams:
     def test_estimate_params_for_gaussian_function(self):
         x = np.array([0, 1, 2, 3, 4, 5])
-        y = gaussian(x, 1, 2, 1)
-        params = estimate_gaussian_params(x, y)
-        assert np.allclose(params, [1, 2, 1])
+        y = gaussian(x, 1000, 10, 2)
+        params, err = estimate_gaussian_params(x, y)
+        assert np.allclose(params, [1000, 10, 2])
 
 
 class TestEquationSystem:
