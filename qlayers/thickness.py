@@ -1,9 +1,8 @@
 import numpy as np
 
+from numpy.random import Generator, PCG64
 from scipy import stats
 from scipy.optimize import curve_fit, fsolve
-
-np.random.seed(0)
 
 
 def logistic(x, L, x0, k):
@@ -205,8 +204,9 @@ def cortical_thickness(qlayers, est_error=False):
     )
     if est_error:
         n_samp = 1000
-        cortex_samples = np.random.normal(params_cortex, err_cortex, (n_samp, len(params_cortex)))
-        medulla_samples = np.random.normal(params_medulla, err_medulla, (n_samp, len(params_medulla)))
+        rng = Generator(PCG64(seed=0))
+        cortex_samples = rng.normal(params_cortex, err_cortex, (n_samp, len(params_cortex)))
+        medulla_samples = rng.normal(params_medulla, err_medulla, (n_samp, len(params_medulla)))
         cortical_depth_samples = np.zeros(n_samp)
         for i in range(n_samp):
             roots = fsolve(equation_system, np.linspace(0, df['depth'].max(), 10),

@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+
+from numpy.random import Generator, PCG64
 from qlayers.thickness import (
     logistic,
     gaussian,
@@ -9,8 +11,6 @@ from qlayers.thickness import (
     equation_system,
     cortical_thickness,
 )
-
-np.random.seed(0)
 
 
 class TestLogistic:
@@ -142,10 +142,11 @@ class TestCorticalThickness:
                 n = 100000
 
                 # Draw samples
-                cortex_depths = np.random.choice(
+                rng = Generator(PCG64(seed=0))
+                cortex_depths = rng.choice(
                     x, size=n, p=cortex_dist / cortex_dist.sum()
                 )
-                medulla_depths = np.random.choice(
+                medulla_depths = rng.choice(
                     x, size=n, p=medulla_dist / medulla_dist.sum()
                 )
                 df_wide = pd.DataFrame(
@@ -160,5 +161,5 @@ class TestCorticalThickness:
 
         thickness, thickness_err = cortical_thickness(MockQLayers(), est_error=True)
 
-        assert np.isclose(thickness, 8.53326)
-        assert np.isclose(thickness_err, 4.72645)
+        assert np.isclose(thickness, 8.89667)
+        assert np.isclose(thickness_err, 5.26185)
