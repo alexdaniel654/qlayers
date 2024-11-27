@@ -3,6 +3,8 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import curve_fit, fsolve
 
+np.random.seed(0)
+
 
 def logistic(x, L, x0, k):
     """
