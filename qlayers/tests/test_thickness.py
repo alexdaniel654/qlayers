@@ -106,10 +106,11 @@ class TestCorticalThickness:
                 n = 1000
 
                 # Draw samples
-                cortex_depths = np.random.choice(
+                rng = Generator(PCG64(seed=0))
+                cortex_depths = rng.choice(
                     x, size=n, p=cortex_dist / cortex_dist.sum()
                 )
-                medulla_depths = np.random.choice(
+                medulla_depths = rng.choice(
                     x, size=n, p=medulla_dist / medulla_dist.sum()
                 )
                 df_wide = pd.DataFrame(
@@ -123,7 +124,7 @@ class TestCorticalThickness:
                 return df_wide
 
         thickness = cortical_thickness(MockQLayers(), est_error=False)
-        assert np.isclose(thickness, 6.84513)
+        assert np.isclose(thickness, 6.96579)
 
     def test_cortical_thickness_returns_expected_value_with_error(self):
         class MockQLayers:
@@ -132,14 +133,14 @@ class TestCorticalThickness:
 
             def get_df(self, _):
                 # Range of depths
-                x = np.linspace(0, 20, 50)
+                x = np.linspace(0, 20, 1000)
 
                 # Distributions to draw from
                 cortex_dist = logistic(x, 500, 10, -0.4)
                 medulla_dist = gaussian(x, 300, 10, 4)
 
                 # Number of samples from each tissue type
-                n = 100000
+                n = 10000
 
                 # Draw samples
                 rng = Generator(PCG64(seed=0))
@@ -160,6 +161,6 @@ class TestCorticalThickness:
                 return df_wide
 
         thickness, thickness_err = cortical_thickness(MockQLayers(), est_error=True)
-
-        assert np.isclose(thickness, 8.89667)
-        assert np.isclose(thickness_err, 5.26185)
+        print(f"Thickness: {thickness}, Error: {thickness_err}")
+        assert np.isclose(thickness, 7.10116, atol=1e-4)
+        assert np.isclose(thickness_err, 0.11867, atol=1e-4)

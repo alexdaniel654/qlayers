@@ -213,7 +213,7 @@ def cortical_thickness(qlayers, est_error=False):
                            args=(*cortex_samples[i], *medulla_samples[i])
                            )
             roots = roots[0 < roots]
-            roots = roots[roots < 100]
+            roots = roots[roots < df["depth"].max()]
             if len(roots) > 0:
                 cortical_depth_samples[i] = stats.mode(roots, keepdims=False)[0]
             else:
