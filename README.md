@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/downloads.svg)](https://anaconda.org/conda-forge/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12707173.svg)](https://doi.org/10.5281/zenodo.12707173)
 
@@ -20,6 +22,12 @@ The easiest way to install `qlayers`is via `pip`:
 pip install qlayers
 ```
 
+or if you're a `conda` user:
+
+```bash
+conda install qlayers -c conda-forge
+```
+
 Alternatively, you can install `qlayers`from source in pips editable mode:
 
 ```bash
@@ -30,8 +38,8 @@ pip install -e .
 
 ## Quick Start
 
-For a more thorough example of how to use `qlayers` see the example notebook,
-however if you want to get started, the snippet of code below should get you going.
+For a more thorough example of how to use `qlayers` see the tutorials section of this reposetry/documentation, however if
+you want to get started, the snippet of code below should get you going.
 
 ```python
 import nibabel as nib
@@ -49,7 +57,9 @@ df.groupby("layer").median().loc[:, "t2star"].plot(
 )
 ```
 
+<p align="center">
 <img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/example_t2star_profile.png" height="360">
+</p>
 
 ## Theory
 
@@ -65,8 +75,9 @@ a 3D mask and apply the layer to any quantitative parameter.
 ### Generating Layers
 
 Layers are generated via the process outlined in the figure below.
-
+<p align="center">
 <img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/flowchart.png" width="50%">
+</p>
 
 a i. Shows the mask thats input to the `QLayers` class. This mask then has any holes smaller than `fill_ml` filled as these are
 most likely cysts
@@ -100,3 +111,15 @@ voxels are shown in the table below.
 | 6.66  | 7     | 49.2 | 20.3 |
 | 19.8  | 20    | 42.8 | 23.3 |
 | 12.1  | 13    | 39.4 | 25.4 |
+
+## Citing 3DQLayers
+
+If you have used 3DQLayers in your research, please cite the following conference abstract:
+
+[Daniel AJ, Francis ST. Volumetric Layer Based Analysis for Quantitative Renal MRI. In: Proc. Intl. Soc. Mag. Reson. Med. 33. Singapore; 2024:2748.](https://www.researchgate.net/publication/380534128_Volumetric_Layer_Based_Analysis_for_Quantitative_Renal_MRI)
+
+Alternatively, if you want to cite a specific version of this software, each release has an individual DOI on Zenodo, the
+DOI for the latest release can be [found here](https://zenodo.org/doi/10.5281/zenodo.12707172).
+
+## Contributing
+Feel free to open a pull request if you have a feature you want to develop or drop me [an email](mailto:alexander.daniel@nottingham.ac.uk?subject=3DQLayers) to discuss things further.

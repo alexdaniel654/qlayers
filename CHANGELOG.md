@@ -1,3 +1,14 @@
+## [0.0.3] - 2024-12-02
+
+### Added
+* 3DQLayers is now on conda-forge
+* Cortical thickness calculations can now produce an uncertainty estimate
+* Citation information has been added to the README
+
+### Changed
+* Smaller pelvis' can now be found #6
+* Updated the tutorial/example notebooks
+
 ## [0.0.2] - 2024-07-10
 
 ### Fixed

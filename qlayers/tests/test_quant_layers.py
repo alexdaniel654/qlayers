@@ -66,6 +66,24 @@ class TestQLayers:
     )
     kidneys_with_pelvis_img = nib.Nifti1Image(kidneys_with_pelvis, aff)
 
+    # Generate a 256 x 256 x 17 image with two kidneys and a small pelvis
+    # Kidneys are oblongs rather than the usual kidney shape. Voxel size is
+    # 1.5 x 1.5 x 5.5 mm typical of anatomical scans
+    kidneys_with_small_pelvis = np.zeros((256, 256, 17))
+    kidneys_with_small_pelvis[96:160, 64:96, 5:12] = 1
+    kidneys_with_small_pelvis[130:133, 86:96, 6:10] = 0
+    kidneys_with_small_pelvis[96:160, 160:192, 5:12] = 1
+    kidneys_with_small_pelvis[130:133, 160:170, 6:10] = 0
+    aff = np.array(
+        [
+            [1.5, 0, 0, 0],
+            [0, 1.5, 0, 0],
+            [0, 0, 5.5, 0],
+            [0, 0, 0, 1],
+        ]
+    )
+    kidneys_with_small_pelvis_img = nib.Nifti1Image(kidneys_with_small_pelvis, aff)
+
     def test_basic_depth(self):
         qlayers = QLayers(self.basic_img)
         depth = qlayers.get_depth()
@@ -127,21 +145,35 @@ class TestQLayers:
         pelvis = qlayers.pelvis
         assert pelvis.sum() == 640
         assert (
-            sha1(pelvis).hexdigest()
-            == "524bddb7e7ff85c88a284aaf11a268e26c3c8a73"
+                sha1(pelvis).hexdigest()
+                == "524bddb7e7ff85c88a284aaf11a268e26c3c8a73"
         )
 
     def test_pelvis_dist(self):
         # 20 mm pelvis distance
         qlayers = QLayers(self.kidneys_with_pelvis_img, pelvis_dist=20)
         layers = qlayers.get_layers()
+        pelvis = qlayers.pelvis
+        assert pelvis.sum() == 640
         assert layers.max() == 21
         assert layers.min() == 0
         assert layers.sum() == 121868
         assert np.sum(layers > 0) == 18984
         assert (
-            sha1(layers).hexdigest()
-            == "0b23f5f58a19d901902f135c83d388df2290268d"
+                sha1(layers).hexdigest()
+                == "0b23f5f58a19d901902f135c83d388df2290268d"
+        )
+
+    def test_iterative_pelvis_dist(self):
+        # Pelvis is smaller than the default noise threshold of 2.5 ml
+        # Segmetation is repeated with a lower threshold until one is found
+        qlayers = QLayers(self.kidneys_with_small_pelvis_img, pelvis_dist=20)
+        layers = qlayers.get_layers()
+        pelvis = qlayers.pelvis
+        assert pelvis.sum() == 136
+        assert (
+                sha1(pelvis).hexdigest()
+                == "57c4b6c815a4817612f1dfde766d0454284581e3"
         )
 
     def test_save(self):

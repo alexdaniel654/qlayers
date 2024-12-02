@@ -19,7 +19,7 @@ readme_path = '../README.md'
 project = '3DQLayers'
 copyright = f'{datetime.now().year}, Alexander J Daniel'
 author = 'Alexander J Daniel'
-release = 'v0.0.2'
+release = 'v0.0.3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -45,7 +45,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_context = {
     "sidebar_external_links_caption": "Links",
-    "sidebar_external_links"        : [
+    "sidebar_external_links": [
         (
             '<i class="fa fa-github fa-fw"></i> Source Code',
             "https://github.com/alexdaniel654/qlayers",

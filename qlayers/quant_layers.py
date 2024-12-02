@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import trimesh
+import warnings
 from nibabel.processing import resample_from_to
 from skimage.measure import marching_cubes
 from skimage.morphology import (opening, remove_small_holes,
@@ -51,7 +52,7 @@ class QLayers:
     # TODO add verbose option
 
     def __init__(
-        self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"
+            self, mask_img, thickness=1, fill_ml=10, pelvis_dist=0, space="map"
     ):
         self.mask_img = mask_img
         self.mask = mask_img.get_fdata() > 0.5
@@ -65,7 +66,7 @@ class QLayers:
         self.space = space
         self.depth = self._calculate_depth()
         self.layers = np.ceil(self.depth * (1 / self.thickness)) / (
-            1 / self.thickness
+                1 / self.thickness
         )
         self.layers_list = np.unique(self.layers)
         self.df_long = pd.DataFrame()
@@ -209,7 +210,7 @@ class QLayers:
 
         if self._tissue_labels is not None:
             if len(np.unique(np.nan_to_num(self._tissue_data_ls))) - 1 != len(
-                self._tissue_labels
+                    self._tissue_labels
             ):
                 raise ValueError(
                     "Number of tissue labels must equal number of unique "
@@ -253,8 +254,8 @@ class QLayers:
                     _tissue_labels_type
                 )
                 for ind, label in zip(
-                    np.sort(self.df_long["tissue"].unique()),
-                    self._tissue_labels
+                        np.sort(self.df_long["tissue"].unique()),
+                        self._tissue_labels
                 ):
                     self.df_long.loc[
                         self.df_long["tissue"] == ind, "tissue"
@@ -265,8 +266,8 @@ class QLayers:
                     _tissue_labels_type
                 )
                 for ind, label in zip(
-                    np.sort(self.df_wide["tissue"].unique()),
-                    self._tissue_labels,
+                        np.sort(self.df_wide["tissue"].unique()),
+                        self._tissue_labels,
                 ):
                     self.df_wide.loc[
                         self.df_wide["tissue"] == ind, "tissue"
@@ -468,49 +469,67 @@ class QLayers:
         depth = np.zeros(self.mask.shape)
         depth[self.mask > 0.5] = distances
         if self.pelvis_dist != 0:
-            self._segment_pelvis()
-            verts_p, faces_p, normals_p, _ = marching_cubes(
-                self.pelvis.astype(np.uint8),
-                spacing=self.zoom,
-                level=0.5,
-                step_size=1.0,
-            )
+            noise_ml = 2.5  # Start with pretty high noise exclusion
+            self._segment_pelvis(noise_ml=2.5)
 
-            mesh_p = trimesh.Trimesh(
-                vertices=verts_p, faces=faces_p, vertex_normals=normals_p
-            )
+            # If no pelvis is found, reduce the noise exclusion until a pelvis
+            # is found or noise_ml is 0
+            while (np.sum(self.pelvis) == 0) and (noise_ml > 0):
+                noise_ml -= 0.5
+                warnings.warn(f"No pelvis found, reducing noise exclusion to {noise_ml} ml")
+                self._segment_pelvis(noise_ml=noise_ml)
 
-            i = 0
-            distances_p = np.zeros(len(points))
-            with tqdm(total=batches,
-                      desc="Pelvis Distance Calculation") as pbar:
-                while i < len(points):
-                    (
-                        closest_points_p,
-                        dist_p,
-                        triangle_id_p,
-                    ) = mesh_p.nearest.on_surface(points[i:i + batch_size])
+            if np.sum(self.pelvis) > 0:
+                verts_p, faces_p, normals_p, _ = marching_cubes(
+                    self.pelvis.astype(np.uint8),
+                    spacing=self.zoom,
+                    level=0.5,
+                    step_size=1.0,
+                )
 
-                    distances_p[i:i + batch_size] = dist_p
-                    i += batch_size
-                    pbar.update()
-            depth_p = np.zeros(self.mask.shape)
-            depth_p[self.mask > 0.5] = distances_p
-            depth[depth_p < self.pelvis_dist] = 0
+                mesh_p = trimesh.Trimesh(
+                    vertices=verts_p, faces=faces_p, vertex_normals=normals_p
+                )
+
+                i = 0
+                distances_p = np.zeros(len(points))
+                with tqdm(total=batches,
+                          desc="Pelvis Distance Calculation") as pbar:
+                    while i < len(points):
+                        (
+                            closest_points_p,
+                            dist_p,
+                            triangle_id_p,
+                        ) = mesh_p.nearest.on_surface(points[i:i + batch_size])
+
+                        distances_p[i:i + batch_size] = dist_p
+                        i += batch_size
+                        pbar.update()
+                depth_p = np.zeros(self.mask.shape)
+                depth_p[self.mask > 0.5] = distances_p
+                depth[depth_p < self.pelvis_dist] = 0
+            else:
+                warnings.warn("No pelvis found, returning depth without pelvis exclusion.")
 
         return depth
 
-    def _segment_pelvis(self):
+    def _segment_pelvis(self, noise_ml=2.5):
         """
         Segments the renal pelvis from the kidney mask and saves it as an
         attribute of the object.
+
+        Parameters
+        ----------
+        noise_ml : float, optional
+            Default 2.5
+            Volume of noise in the mask to remove, in cubic centimeters (ml)
         """
         fill_vox = int(self.fill_ml / (np.prod(self.zoom) / 1000))
         mask_filled = remove_small_holes(self.mask, fill_vox)
         mask_ch = convex_hull_objects(mask_filled)
         hulls = (mask_ch ^ mask_filled) & mask_ch
         hulls = opening(hulls)
-        noise_ml = 2.5
+
         noise_vox = int(noise_ml / (np.prod(self.zoom) / 1000))
         self.pelvis = remove_small_objects(hulls, noise_vox)
 
