@@ -10,13 +10,13 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="qlayers",
-    version="0.0.2",
+    version="0.0.3",
     description="Quantitative layer analysis for renal MRI",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/alexdaniel654/qlayers",
     license="GPL-3.0",
-    python_requires=">=3.8, <4",
+    python_requires=">=3.9, <4",
     packages=find_packages(),
     install_requires=requirements,
     include_package_data=True,
@@ -27,7 +27,6 @@ setup(
         "Topic :: Scientific/Engineering",
         "Environment :: Console",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
