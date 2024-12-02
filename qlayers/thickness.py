@@ -177,7 +177,7 @@ def cortical_thickness(qlayers, est_error=False):
     if not sorted(list(map(str.lower, df["tissue"].unique()))) == ["cortex", "medulla"]:
         raise ValueError(
             "Cortical thickness can only be computed if tissue "
-            'labels are "cortex" and "medulla"'
+            'labels are "Cortex" and "Medulla"'
         )
 
     # Convert samples into a distribution that the curves can be fit to
