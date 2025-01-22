@@ -2,7 +2,7 @@
 
 [![Python CI](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml/badge.svg?branch=main)](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml)
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
-[![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/latest/)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
@@ -122,4 +122,4 @@ Alternatively, if you want to cite a specific version of this software, each rel
 DOI for the latest release can be [found here](https://zenodo.org/doi/10.5281/zenodo.12707172).
 
 ## Contributing
-Feel free to open a pull request if you have a feature you want to develop or drop me [an email](mailto:alexander.daniel@nottingham.ac.uk?subject=3DQLayers) to discuss things further.
+We welcome contributions to QLayers, a full contributing guide can be found [here](.github/CONTRIBUTING.md).
