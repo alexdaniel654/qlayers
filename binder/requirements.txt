@@ -6,3 +6,4 @@ rtree
 scikit-image
 tqdm
 trimesh
+qlayers
