@@ -1,15 +1,15 @@
 # QLayers
-
 [![Python CI](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml/badge.svg?branch=main)](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml)
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/latest/)
 [![Binder](https://terrarium.evidencepub.io/badge_logo.svg)](https://terrarium.evidencepub.io/v2/gh/alexdaniel654/qlayers/HEAD)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/downloads.svg)](https://anaconda.org/conda-forge/qlayers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12707173.svg)](https://doi.org/10.5281/zenodo.12707173)
+[![status](https://joss.theoj.org/papers/4ba0da8bd14467f35ccdd059cb7b465f/status.svg)](https://joss.theoj.org/papers/4ba0da8bd14467f35ccdd059cb7b465f)
 
 <h2 align="center"><img src="https://raw.githubusercontent.com/alexdaniel654/qlayers/main/images/3DQLayers_Logo_Logo.png" height="100"></h2>
 
