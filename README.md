@@ -3,6 +3,7 @@
 [![Python CI](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml/badge.svg?branch=main)](https://github.com/alexdaniel654/qlayers/actions/workflows/python_ci.yml)
 [![codecov](https://codecov.io/gh/alexdaniel654/qlayers/graph/badge.svg?token=06FRSZ02SJ)](https://codecov.io/gh/alexdaniel654/qlayers)
 [![Documentation Status](https://readthedocs.org/projects/qlayers/badge/?version=latest)](https://qlayers.readthedocs.io/latest/)
+[![Binder](https://terrarium.evidencepub.io/badge_logo.svg)](https://terrarium.evidencepub.io/v2/gh/alexdaniel654/qlayers/HEAD)
 [![PyPI version](https://badge.fury.io/py/qlayers.svg)](https://badge.fury.io/py/qlayers)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/qlayers/badges/version.svg)](https://anaconda.org/conda-forge/qlayers)
 [![Downloads](https://static.pepy.tech/badge/qlayers)](https://pepy.tech/project/qlayers)
@@ -38,8 +39,11 @@ pip install -e .
 
 ## Quick Start
 
-For a more thorough example of how to use `qlayers` see the tutorials section of this reposetry/documentation, however if
-you want to get started, the snippet of code below should get you going.
+Documentation for `qlayers` can be found [here](https://qlayers.readthedocs.io/latest/). This includes a full API 
+reference, tutorials and examples of how to use `qlayers` to generate layers and apply them to quantitative maps. 
+The tutorials can also be run through [binder](https://terrarium.evidencepub.io/v2/gh/alexdaniel654/qlayers/HEAD) if 
+you want to have a go with `qlayers` without installing anything. However, if you want to get started on your machine 
+with the minimum lines of code, the snippet of code below should get you going.
 
 ```python
 import nibabel as nib
