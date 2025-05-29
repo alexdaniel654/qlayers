@@ -1,0 +1,11 @@
+nibabel
+numpy
+pandas
+pytest
+rtree
+scikit-image
+tqdm
+trimesh
+qlayers
+matplotlib
+seaborn

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mkdir -p examples/data
+curl -L "https://zenodo.org/api/records/14259406/files-archive" -o example_dataset.zip
+unzip example_dataset.zip -d examples/data
