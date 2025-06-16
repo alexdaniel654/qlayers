@@ -1,3 +1,14 @@
+## [1.0.0] - 2025-06-16
+
+### Added
+* Tutorials/example notebooks can now be run vis Binder #8
+
+### Changed
+* Improved community guidelines (contributing guide and code of conduct)
+
+### Fixed
+* Some issues with badges in the README
+
 ## [0.0.3] - 2024-12-02
 
 ### Added
